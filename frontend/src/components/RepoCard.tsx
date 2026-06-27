@@ -20,156 +20,82 @@ export default function RepoCard({ repo, onSave, isSaved: initialIsSaved = false
       await onSave(repo);
       setIsSaved(true);
     } catch (err) {
-      console.error("Failed to save repository", err);
+      console.error('Failed to save repository', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-emerald-400 border-emerald-500/30 bg-emerald-500/5';
-    if (score >= 60) return 'text-indigo-400 border-indigo-500/30 bg-indigo-500/5';
-    if (score >= 40) return 'text-amber-400 border-amber-500/30 bg-amber-500/5';
-    return 'text-rose-400 border-rose-500/30 bg-rose-500/5';
-  };
+  const scoreClass = repo.gitniche_score >= 80
+    ? 'border-[#2da44e] bg-[#dafbe1] text-[#116329]'
+    : repo.gitniche_score >= 60
+      ? 'border-[#54aeff] bg-[#ddf4ff] text-[#0969da]'
+      : repo.gitniche_score >= 40
+        ? 'border-[#d4a72c] bg-[#fff8c5] text-[#7d4e00]'
+        : 'border-[#ff8182] bg-[#ffebe9] text-[#cf222e]';
 
-  const getDifficultyColor = (level: string) => {
-    if (level === 'Beginner-Friendly') return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
-    if (level === 'Advanced') return 'text-rose-400 bg-rose-500/10 border-rose-500/20';
-    return 'text-blue-400 bg-blue-500/10 border-blue-500/20';
-  };
+  const difficultyClass = repo.difficulty_level === 'Beginner-Friendly'
+    ? 'border-[#2da44e] bg-[#dafbe1] text-[#116329]'
+    : repo.difficulty_level === 'Advanced'
+      ? 'border-[#ff8182] bg-[#ffebe9] text-[#cf222e]'
+      : 'border-[#54aeff] bg-[#ddf4ff] text-[#0969da]';
 
   const formatDate = (dateStr: string) => {
-    try {
-      const date = new Date(dateStr);
-      return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-    } catch (e) {
-      return dateStr;
-    }
+    const date = new Date(dateStr);
+    return Number.isNaN(date.getTime()) ? dateStr : date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
   return (
-    <div className="group relative bg-slate-900/30 border border-slate-800/80 rounded-2xl p-6 hover:border-slate-700/80 transition-all duration-300 flex flex-col justify-between hover:shadow-xl hover:shadow-indigo-500/5 hover:-translate-y-0.5 overflow-hidden backdrop-blur-sm">
-      {/* Glossy overlay effect on hover */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/0 via-indigo-500/0 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-
+    <article className="flex min-h-72 flex-col justify-between rounded-md border border-[#d0d7de] bg-white p-5 shadow-sm transition hover:border-[#8c959f] hover:shadow-md">
       <div>
-        <div className="flex justify-between items-start gap-4 mb-3">
-          {/* Owner & Repo Name */}
+        <div className="mb-3 flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-xs text-slate-400 font-medium truncate mb-0.5">{repo.owner}</p>
-            <h3 className="text-lg font-bold text-slate-100 truncate group-hover:text-white transition">
+            <p className="mb-1 truncate text-xs text-[#57606a]">{repo.owner}</p>
+            <a href={repo.github_url} target="_blank" rel="noopener noreferrer" className="block truncate text-lg font-semibold text-[#0969da] hover:underline">
               {repo.name}
-            </h3>
+            </a>
           </div>
-
-          {/* GitNiche Score */}
-          <div className={`flex flex-col items-center justify-center border rounded-xl py-1 px-2.5 h-12 w-14 shrink-0 font-bold ${getScoreColor(repo.gitniche_score)}`}>
-            <span className="text-lg leading-none">{repo.gitniche_score}</span>
-            <span className="text-[7px] uppercase tracking-wider text-slate-400 mt-0.5">Score</span>
+          <div className={`shrink-0 rounded-md border px-2.5 py-1 text-center ${scoreClass}`}>
+            <div className="text-base font-semibold leading-none">{repo.gitniche_score}</div>
+            <div className="mt-0.5 text-[10px] font-medium uppercase">Score</div>
           </div>
         </div>
 
-        {/* Description */}
-        <p className="text-slate-300 text-xs line-clamp-2 leading-relaxed mb-4 h-8">
-          {repo.description || "No description provided."}
+        <p className="mb-4 line-clamp-2 min-h-10 text-sm leading-5 text-[#57606a]">
+          {repo.description || 'No description provided.'}
         </p>
 
-        {/* Tags / Badges */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {repo.language && (
-            <span className="text-[10px] font-semibold text-purple-300 bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-md">
-              {repo.language}
-            </span>
-          )}
-          <span className="text-[10px] font-semibold text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-md">
-            {repo.domain}
-          </span>
-          <span className={`text-[10px] font-semibold border px-2 py-0.5 rounded-md ${getDifficultyColor(repo.difficulty_level)}`}>
-            {repo.difficulty_level}
-          </span>
+        <div className="mb-4 flex flex-wrap gap-2">
+          {repo.language && <span className="rounded-full border border-[#d0d7de] bg-[#f6f8fa] px-2 py-0.5 text-xs font-medium text-[#57606a]">{repo.language}</span>}
+          <span className="rounded-full border border-[#54aeff] bg-[#ddf4ff] px-2 py-0.5 text-xs font-medium text-[#0969da]">{repo.domain}</span>
+          <span className={`rounded-full border px-2 py-0.5 text-xs font-medium ${difficultyClass}`}>{repo.difficulty_level}</span>
         </div>
       </div>
 
       <div>
-        {/* Repo stats */}
-        <div className="flex items-center gap-4 text-xs text-slate-400 mb-5 border-t border-slate-800/80 pt-4">
+        <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-[#d8dee4] pt-3 text-xs text-[#57606a]">
           <span className="flex items-center gap-1">
-            <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-            </svg>
+            <svg className="h-4 w-4" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.211.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.194a.751.751 0 0 1-1.088.791L8 12.347l-3.767 1.982a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.211-.611L7.327.668A.75.75 0 0 1 8 .25Z" /></svg>
             {repo.stars.toLocaleString()}
           </span>
           <span className="flex items-center gap-1">
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-            </svg>
+            <svg className="h-4 w-4" viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm0 2.122a2.25 2.25 0 1 0-1.5 0v5.256a2.25 2.25 0 1 0 1.5 0V8.123A3.75 3.75 0 0 0 8.25 10h2.378a2.25 2.25 0 1 0 0-1.5H8.25A2.25 2.25 0 0 1 6 6.25V5.372ZM12.75 9a.75.75 0 1 1 0 1.5.75.75 0 0 1 0-1.5Zm-8.5 3.5a.75.75 0 1 1 0 1.5.75.75 0 0 1 0-1.5Z" /></svg>
             {repo.forks.toLocaleString()}
           </span>
-          <span className="ml-auto text-[10px] text-slate-500 font-mono">
-            Active: {formatDate(repo.last_activity_date)}
-          </span>
+          <span className="ml-auto">Updated {formatDate(repo.last_activity_date)}</span>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-2">
-          {/* Main GitHub Link */}
-          <a
-            href={repo.github_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 py-2 px-3 bg-slate-800 hover:bg-slate-700/80 text-slate-200 text-xs font-semibold rounded-xl text-center transition flex items-center justify-center gap-1.5 border border-slate-700/40"
-          >
-            GitHub
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
-          </a>
-
-          {/* Quick Launch Buttons */}
-          <a
-            href={repo.codespaces_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="py-2 px-2.5 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 text-[10px] font-bold rounded-xl transition border border-indigo-500/20 flex items-center justify-center"
-            title="Launch in GitHub Codespaces"
-          >
-            Codespaces
-          </a>
-
-          <a
-            href={repo.gitpod_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="py-2 px-2.5 bg-purple-600/10 hover:bg-purple-600/20 text-purple-400 text-[10px] font-bold rounded-xl transition border border-purple-500/20 flex items-center justify-center"
-            title="Launch in Gitpod"
-          >
-            Gitpod
-          </a>
-
-          {/* Save Button */}
+        <div className="flex flex-wrap gap-2">
+          <a href={repo.github_url} target="_blank" rel="noopener noreferrer" className="rounded-md border border-[#d0d7de] bg-[#f6f8fa] px-3 py-1.5 text-xs font-semibold text-[#24292f] hover:bg-[#f3f4f6]">GitHub</a>
+          <a href={repo.codespaces_url} target="_blank" rel="noopener noreferrer" className="rounded-md border border-[#d0d7de] bg-[#f6f8fa] px-3 py-1.5 text-xs font-semibold text-[#24292f] hover:bg-[#f3f4f6]">Codespaces</a>
+          <a href={repo.gitpod_url} target="_blank" rel="noopener noreferrer" className="rounded-md border border-[#d0d7de] bg-[#f6f8fa] px-3 py-1.5 text-xs font-semibold text-[#24292f] hover:bg-[#f3f4f6]">Gitpod</a>
           {onSave && (
-            <button
-              onClick={handleSave}
-              disabled={isSaved || loading}
-              className={`p-2 rounded-xl border transition-colors flex items-center justify-center cursor-pointer ${
-                isSaved
-                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                  : 'bg-slate-900 border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200'
-              }`}
-              title={isSaved ? "Saved" : "Save repository"}
-            >
-              {loading ? (
-                <div className="w-4 h-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
-              ) : (
-                <svg className="w-4 h-4" fill={isSaved ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                </svg>
-              )}
+            <button onClick={handleSave} disabled={isSaved || loading} className={`ml-auto rounded-md border px-3 py-1.5 text-xs font-semibold ${isSaved ? 'border-[#2da44e] bg-[#dafbe1] text-[#116329]' : 'border-[#d0d7de] bg-white text-[#24292f] hover:bg-[#f6f8fa]'}`}>
+              {loading ? 'Saving...' : isSaved ? 'Saved' : 'Save'}
             </button>
           )}
         </div>
       </div>
-    </div>
+    </article>
   );
 }

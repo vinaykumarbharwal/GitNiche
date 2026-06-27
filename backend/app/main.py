@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
-from app.routes import search, preferences, saved_repos
+from app.routes import search, preferences, saved_repos, auth
 
 app = FastAPI(
     title="GitNiche API",
@@ -21,6 +21,7 @@ app.add_middleware(
 )
 
 # Include Routers
+app.include_router(auth.router, prefix="/api", tags=["Auth"])
 app.include_router(search.router, prefix="/api", tags=["Search"])
 app.include_router(preferences.router, prefix="/api", tags=["Preferences"])
 app.include_router(saved_repos.router, prefix="/api", tags=["Saved Repositories"])

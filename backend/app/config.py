@@ -14,6 +14,10 @@ class Settings(BaseSettings):
     
     # GitHub Token to avoid rate limiting
     GITHUB_TOKEN: str = ""
+    GITHUB_CLIENT_ID: str = ""
+    GITHUB_CLIENT_SECRET: str = ""
+    GITHUB_OAUTH_REDIRECT_URI: str = "http://localhost:8000/api/auth/github/callback"
+    FRONTEND_URL: str = "http://localhost:3000"
     
     # Supabase credentials
     SUPABASE_URL: str = ""

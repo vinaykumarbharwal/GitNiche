@@ -4,7 +4,11 @@ import { useState, useEffect, useCallback } from 'react';
 import SearchBar from '@/components/SearchBar';
 import Filters from '@/components/Filters';
 import RepoCard from '@/components/RepoCard';
-import { apiService, RepoResult } from '@/services/api';
+import { apiService, authStorage, RepoResult } from '@/services/api';
+
+function getErrorMessage(err: unknown, fallback: string) {
+  return err instanceof Error ? err.message : fallback;
+}
 
 export default function Home() {
   const [query, setQuery] = useState('');
@@ -20,8 +24,8 @@ export default function Home() {
 
   // Initialize user_id from localStorage
   useEffect(() => {
-    const savedUserId = localStorage.getItem('gitniche_user_id') || '00000000-0000-0000-0000-000000000000';
-    setUserId(savedUserId);
+    const session = authStorage.getSession();
+    setUserId(session?.user_id || '00000000-0000-0000-0000-000000000000');
   }, []);
 
   const fetchRepos = useCallback(async (
@@ -42,9 +46,9 @@ export default function Home() {
         user_id: currUserId || undefined
       });
       setRepos(results);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.message || 'Failed to load opportunities. Ensure the backend server is running.');
+      setError(getErrorMessage(err, 'Failed to load opportunities. Ensure the backend server is running.')); 
     } finally {
       setLoading(false);
     }
@@ -70,16 +74,14 @@ export default function Home() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full flex-1 flex flex-col">
+    <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
       {/* Hero Header */}
-      <div className="text-center max-w-3xl mx-auto mb-12">
-        <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-4">
+      <div className="mb-6 border-b border-[#d8dee4] pb-6">
+        <h1 className="mb-2 text-3xl font-semibold tracking-tight text-[#24292f] sm:text-4xl">
           Discover Your Next
-          <span className="block mt-1 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-            Open Source Contribution
-          </span>
+          <span className="block text-[#0969da]">Open Source Contribution</span>
         </h1>
-        <p className="text-slate-400 text-sm sm:text-base max-w-xl mx-auto">
+        <p className="max-w-2xl text-sm leading-6 text-[#57606a] sm:text-base">
           GitNiche uses AI-assisted labeling to find active, beginner-friendly GitHub repositories customized to your skills and career objectives.
         </p>
       </div>
@@ -88,7 +90,7 @@ export default function Home() {
       <SearchBar onSearch={(q) => setQuery(q)} initialValue={query} />
 
       {/* Grid Layout: Filter Sidebar + Repository Grid */}
-      <div className="flex flex-col lg:flex-row gap-8 items-start w-full mt-4 flex-1">
+      <div className="mt-6 flex w-full flex-1 flex-col items-start gap-6 lg:flex-row">
         <Filters
           selectedDomain={domain}
           selectedLevel={level}
@@ -98,17 +100,17 @@ export default function Home() {
           onChangeLanguage={(lang) => setLanguage(lang)}
         />
 
-        <div className="flex-1 w-full flex flex-col">
+        <div className="flex w-full flex-1 flex-col">
           {/* Results Status */}
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
+          <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <h3 className="text-sm font-semibold text-[#24292f]">
               {loading ? 'Finding projects...' : `${repos.length} matches found`}
             </h3>
             
             {/* Show a reminder if using default mock account */}
             {userId === '00000000-0000-0000-0000-000000000000' && (
-              <span className="text-[10px] text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-md border border-indigo-500/15">
-                Browsing as Mock Guest. Set preferences to customize scoring!
+              <span className="rounded-full border border-[#d0d7de] bg-[#f6f8fa] px-2.5 py-1 text-xs text-[#57606a]">
+                Browsing as guest. Sign in with GitHub to save your profile.
               </span>
             )}
           </div>
@@ -116,27 +118,27 @@ export default function Home() {
           {/* Loader, Error, or Results Grid */}
           {loading ? (
             <div className="flex-1 flex flex-col items-center justify-center py-20 gap-4">
-              <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-              <p className="text-xs text-slate-400">Classifying domains & calculating GitNiche scores...</p>
+              <div className="w-10 h-10 border-4 border-[#d0d7de] border-t-[#0969da] rounded-full animate-spin"></div>
+              <p className="text-xs text-[#57606a]">Classifying domains & calculating GitNiche scores...</p>
             </div>
           ) : error ? (
-            <div className="flex-1 flex flex-col items-center justify-center py-16 px-4 border border-rose-500/10 rounded-2xl bg-rose-500/5 text-center">
-              <svg className="w-12 h-12 text-rose-500/80 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <div className="flex-1 flex flex-col items-center justify-center py-16 px-4 rounded-md border border-[#ff8182] bg-[#ffebe9] text-center">
+              <svg className="w-12 h-12 text-[#cf222e] mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
-              <h4 className="text-slate-200 font-bold mb-1">Server Connection Offline</h4>
-              <p className="text-xs text-slate-400 max-w-sm">{error}</p>
+              <h4 className="text-[#24292f] font-bold mb-1">Server Connection Offline</h4>
+              <p className="text-xs text-[#57606a] max-w-sm">{error}</p>
             </div>
           ) : repos.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center py-20 border border-slate-900 rounded-2xl bg-slate-900/10 text-center">
-              <svg className="w-12 h-12 text-slate-600 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <div className="flex-1 flex flex-col items-center justify-center py-20 rounded-md border border-[#d0d7de] bg-white text-center">
+              <svg className="w-12 h-12 text-[#6e7781] mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" />
               </svg>
-              <h4 className="text-slate-300 font-bold mb-1">No matches found</h4>
-              <p className="text-xs text-slate-500 max-w-xs">Try broadening your search query or loosening your filter criteria.</p>
+              <h4 className="text-[#24292f] font-bold mb-1">No matches found</h4>
+              <p className="text-xs text-[#57606a] max-w-xs">Try broadening your search query or loosening your filter criteria.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
               {repos.map((repo, idx) => (
                 <RepoCard
                   key={`${repo.owner}-${repo.name}-${idx}`}
