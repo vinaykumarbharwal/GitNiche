@@ -9,7 +9,7 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.config import settings
-from app.routes import search, preferences, saved_repos
+from app.routes import search, preferences, saved_repos, auth
 
 app = FastAPI(
     title="GitNiche API",
@@ -28,6 +28,7 @@ app.add_middleware(
 )
 
 # Include Routers
+app.include_router(auth.router, prefix="/api", tags=["Auth"])
 app.include_router(search.router, prefix="/api", tags=["Search"])
 app.include_router(preferences.router, prefix="/api", tags=["Preferences"])
 app.include_router(saved_repos.router, prefix="/api", tags=["Saved Repositories"])

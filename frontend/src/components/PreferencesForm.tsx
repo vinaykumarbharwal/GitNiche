@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { apiService, PreferencesPayload } from '@/services/api';
+import { apiService, authStorage, PreferencesPayload } from '@/services/api';
+
+function getErrorMessage(err: unknown, fallback: string) {
+  return err instanceof Error ? err.message : fallback;
+}
 
 interface PreferencesFormProps {
   onSaveSuccess?: (userId: string, username: string) => void;
@@ -20,39 +24,26 @@ export default function PreferencesForm({ onSaveSuccess }: PreferencesFormProps)
   const domains = ['AI/ML', 'Blockchain', 'Cybersecurity', 'Web Development', 'DevOps', 'Cloud'];
   const languages = ['TypeScript', 'Python', 'Rust', 'Go', 'JavaScript', 'Java', 'C++', 'Ruby'];
 
-  // Load preferences from localStorage if exists
   useEffect(() => {
-    const savedUserId = localStorage.getItem('gitniche_user_id');
-    const savedUsername = localStorage.getItem('gitniche_username');
-    const savedEmail = localStorage.getItem('gitniche_email');
-    
-    if (savedUsername) setUsername(savedUsername);
-    if (savedEmail) setEmail(savedEmail);
-
-    if (savedUserId) {
+    const session = authStorage.getSession();
+    if (session) {
+      setUsername(session.username);
+      setEmail(session.email);
       setLoading(true);
-      apiService.getPreferences(savedUserId)
+      apiService.getPreferences(session.user_id)
         .then((pref) => {
           setSelectedDomains(pref.domains || []);
           setSelectedLanguages(pref.languages || []);
           setExperienceLevel(pref.experience_level || 'Beginner-Friendly');
           setCareerGoal(pref.career_goal || '');
         })
-        .catch((err) => console.error("Could not fetch preferences on mount", err))
+        .catch((err) => console.error('Could not fetch preferences on mount', err))
         .finally(() => setLoading(false));
     }
   }, []);
 
-  const handleToggleDomain = (domain: string) => {
-    setSelectedDomains(prev =>
-      prev.includes(domain) ? prev.filter(d => d !== domain) : [...prev, domain]
-    );
-  };
-
-  const handleToggleLanguage = (lang: string) => {
-    setSelectedLanguages(prev =>
-      prev.includes(lang) ? prev.filter(l => l !== lang) : [...prev, lang]
-    );
+  const toggleValue = (value: string, values: string[], setter: (next: string[]) => void) => {
+    setter(values.includes(value) ? values.filter((item) => item !== value) : [...values, value]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -76,168 +67,82 @@ export default function PreferencesForm({ onSaveSuccess }: PreferencesFormProps)
 
     try {
       const response = await apiService.savePreferences(payload);
-      
-      // Save credentials in localStorage
-      localStorage.setItem('gitniche_user_id', response.user.id);
-      localStorage.setItem('gitniche_username', response.user.github_username);
-      localStorage.setItem('gitniche_email', response.user.email);
-      
-      setMessage({ text: 'Preferences saved and synced successfully!', isError: false });
-      
-      if (onSaveSuccess) {
-        onSaveSuccess(response.user.id, response.user.github_username);
-      }
-    } catch (err: any) {
+      authStorage.saveSession({
+        user_id: response.user.id,
+        username: response.user.github_username,
+        email: response.user.email,
+        avatar_url: authStorage.getSession()?.avatar_url,
+      });
+      setMessage({ text: 'Preferences saved.', isError: false });
+      onSaveSuccess?.(response.user.id, response.user.github_username);
+    } catch (err: unknown) {
       console.error(err);
-      setMessage({ text: err.message || 'Error occurred while saving preferences.', isError: true });
+      setMessage({ text: getErrorMessage(err, 'Error occurred while saving preferences.'), isError: true });
     } finally {
       setLoading(false);
     }
   };
 
+  const fieldClass = 'rounded-md border border-[#d0d7de] bg-[#f6f8fa] px-3 py-2 text-sm text-[#24292f] outline-none placeholder:text-[#6e7781] focus:border-[#0969da] focus:bg-white focus:ring-2 focus:ring-[#0969da]/20';
+
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-2xl mx-auto bg-slate-900/40 border border-slate-800 rounded-3xl p-8 backdrop-blur-md shadow-2xl">
-      <div className="mb-8">
-        <h2 className="text-xl font-bold text-slate-100 bg-gradient-to-r from-indigo-200 to-indigo-400 bg-clip-text text-transparent mb-2">
-          Setup Developer Profile
-        </h2>
-        <p className="text-xs text-slate-400">
-          Sync your profile to receive higher relevance scores and bookmark your favorite opportunities.
-        </p>
+    <form onSubmit={handleSubmit} className="mx-auto w-full max-w-3xl rounded-md border border-[#d0d7de] bg-white shadow-sm">
+      <div className="border-b border-[#d8dee4] px-5 py-4">
+        <h2 className="text-base font-semibold text-[#24292f]">Developer profile</h2>
+        <p className="mt-1 text-sm text-[#57606a]">Use your GitHub identity and preferences to tune repository scoring.</p>
       </div>
 
-      <div className="flex flex-col gap-6">
-        {/* User Account Info */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="flex flex-col gap-2">
-            <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">GitHub Username</label>
-            <input
-              type="text"
-              required
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="e.g. torvalds"
-              className="px-4 py-2.5 bg-slate-950/60 border border-slate-850 rounded-xl text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-sm placeholder-slate-600"
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Email Address</label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="e.g. dev@domain.com"
-              className="px-4 py-2.5 bg-slate-950/60 border border-slate-850 rounded-xl text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-sm placeholder-slate-600"
-            />
-          </div>
+      <div className="flex flex-col gap-5 p-5">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <label className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-[#24292f]">GitHub username</span>
+            <input type="text" required value={username} onChange={(e) => setUsername(e.target.value)} placeholder="octocat" className={fieldClass} />
+          </label>
+          <label className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-[#24292f]">Email</span>
+            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="dev@example.com" className={fieldClass} />
+          </label>
         </div>
 
-        <div className="h-px bg-slate-800/80 w-full my-1"></div>
-
-        {/* Domain choices */}
-        <div className="flex flex-col gap-3">
-          <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Preferred Domains</label>
+        <div className="border-t border-[#d8dee4] pt-5">
+          <div className="mb-2 text-sm font-medium text-[#24292f]">Preferred domains</div>
           <div className="flex flex-wrap gap-2">
             {domains.map((dom) => {
               const selected = selectedDomains.includes(dom);
-              return (
-                <button
-                  type="button"
-                  key={dom}
-                  onClick={() => handleToggleDomain(dom)}
-                  className={`px-4 py-2 rounded-xl text-xs font-semibold border transition cursor-pointer ${
-                    selected
-                      ? 'bg-indigo-500/20 border-indigo-500 text-indigo-300'
-                      : 'bg-slate-950/45 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
-                  }`}
-                >
-                  {dom}
-                </button>
-              );
+              return <button type="button" key={dom} onClick={() => toggleValue(dom, selectedDomains, setSelectedDomains)} className={`rounded-full border px-3 py-1 text-xs font-medium ${selected ? 'border-[#0969da] bg-[#ddf4ff] text-[#0969da]' : 'border-[#d0d7de] bg-[#f6f8fa] text-[#57606a] hover:bg-white'}`}>{dom}</button>;
             })}
           </div>
         </div>
 
-        {/* Tech language choices */}
-        <div className="flex flex-col gap-3">
-          <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Preferred Languages</label>
+        <div>
+          <div className="mb-2 text-sm font-medium text-[#24292f]">Preferred languages</div>
           <div className="flex flex-wrap gap-2">
             {languages.map((lang) => {
               const selected = selectedLanguages.includes(lang);
-              return (
-                <button
-                  type="button"
-                  key={lang}
-                  onClick={() => handleToggleLanguage(lang)}
-                  className={`px-4 py-2 rounded-xl text-xs font-semibold border transition cursor-pointer ${
-                    selected
-                      ? 'bg-purple-500/20 border-purple-500 text-purple-300'
-                      : 'bg-slate-950/45 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
-                  }`}
-                >
-                  {lang}
-                </button>
-              );
+              return <button type="button" key={lang} onClick={() => toggleValue(lang, selectedLanguages, setSelectedLanguages)} className={`rounded-full border px-3 py-1 text-xs font-medium ${selected ? 'border-[#2da44e] bg-[#dafbe1] text-[#116329]' : 'border-[#d0d7de] bg-[#f6f8fa] text-[#57606a] hover:bg-white'}`}>{lang}</button>;
             })}
           </div>
         </div>
 
-        {/* Difficulty Select */}
-        <div className="flex flex-col gap-2">
-          <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Target Difficulty</label>
-          <div className="grid grid-cols-3 gap-2">
-            {['Beginner-Friendly', 'Intermediate', 'Advanced'].map((level) => {
-              const selected = experienceLevel === level;
-              return (
-                <button
-                  type="button"
-                  key={level}
-                  onClick={() => setExperienceLevel(level)}
-                  className={`py-2.5 rounded-xl text-xs font-semibold border transition cursor-pointer ${
-                    selected
-                      ? 'bg-emerald-500/10 border-emerald-500 text-emerald-300'
-                      : 'bg-slate-950/45 border-slate-800 text-slate-400 hover:border-slate-700'
-                  }`}
-                >
-                  {level}
-                </button>
-              );
-            })}
+        <div>
+          <div className="mb-2 text-sm font-medium text-[#24292f]">Target difficulty</div>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            {['Beginner-Friendly', 'Intermediate', 'Advanced'].map((level) => (
+              <button type="button" key={level} onClick={() => setExperienceLevel(level)} className={`rounded-md border px-3 py-2 text-sm font-medium ${experienceLevel === level ? 'border-[#0969da] bg-[#ddf4ff] text-[#0969da]' : 'border-[#d0d7de] bg-[#f6f8fa] text-[#24292f] hover:bg-white'}`}>{level}</button>
+            ))}
           </div>
         </div>
 
-        {/* Career Goals */}
-        <div className="flex flex-col gap-2">
-          <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Career Objectives / Notes</label>
-          <textarea
-            rows={3}
-            value={careerGoal}
-            onChange={(e) => setCareerGoal(e.target.value)}
-            placeholder="e.g. Find Python ML projects to work on to enhance my portfolio..."
-            className="px-4 py-2.5 bg-slate-950/60 border border-slate-850 rounded-xl text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-sm placeholder-slate-600 resize-none"
-          ></textarea>
-        </div>
+        <label className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-[#24292f]">Career objectives</span>
+          <textarea rows={4} value={careerGoal} onChange={(e) => setCareerGoal(e.target.value)} placeholder="Find Python ML projects to build my portfolio." className={`${fieldClass} resize-none`} />
+        </label>
 
-        {/* Submission button & message */}
-        <div className="mt-4 flex flex-col gap-3">
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-indigo-500/20 cursor-pointer disabled:opacity-50"
-          >
-            {loading ? 'Saving Profile...' : 'Save and Update Profile'}
+        <div className="flex flex-col gap-3 border-t border-[#d8dee4] pt-5 sm:flex-row sm:items-center">
+          <button type="submit" disabled={loading} className="rounded-md bg-[#2da44e] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#2c974b] disabled:opacity-60">
+            {loading ? 'Saving...' : 'Save preferences'}
           </button>
-
-          {message && (
-            <div className={`p-4 rounded-xl border text-center text-xs font-semibold ${
-              message.isError
-                ? 'bg-rose-500/10 border-rose-500/20 text-rose-400'
-                : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-            }`}>
-              {message.text}
-            </div>
-          )}
+          {message && <span className={`text-sm font-medium ${message.isError ? 'text-[#cf222e]' : 'text-[#116329]'}`}>{message.text}</span>}
         </div>
       </div>
     </form>

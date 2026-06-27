@@ -1,5 +1,36 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
+
+export interface AuthSession {
+  user_id: string;
+  username: string;
+  email: string;
+  avatar_url?: string;
+}
+
+export const authStorage = {
+  getSession(): AuthSession | null {
+    if (typeof window === 'undefined') return null;
+    const user_id = localStorage.getItem('gitniche_user_id');
+    const username = localStorage.getItem('gitniche_username');
+    const email = localStorage.getItem('gitniche_email');
+    const avatar_url = localStorage.getItem('gitniche_avatar_url') || undefined;
+    if (!user_id || !username) return null;
+    return { user_id, username, email: email || '', avatar_url };
+  },
+  saveSession(session: AuthSession) {
+    localStorage.setItem('gitniche_user_id', session.user_id);
+    localStorage.setItem('gitniche_username', session.username);
+    localStorage.setItem('gitniche_email', session.email);
+    if (session.avatar_url) localStorage.setItem('gitniche_avatar_url', session.avatar_url);
+  },
+  clearSession() {
+    localStorage.removeItem('gitniche_user_id');
+    localStorage.removeItem('gitniche_username');
+    localStorage.removeItem('gitniche_email');
+    localStorage.removeItem('gitniche_avatar_url');
+  },
+};
 export interface RepoResult {
   name: string;
   owner: string;
@@ -58,6 +89,10 @@ export interface SavedRepository {
 }
 
 export const apiService = {
+  getGitHubLoginUrl(): string {
+    return `${API_BASE_URL}/api/auth/github/login`;
+  },
+
   async searchRepositories(params: {
     query?: string;
     domain?: string;
