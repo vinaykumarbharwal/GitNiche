@@ -10,7 +10,8 @@ class HuggingFaceService:
         self.api_url = "https://api-inference.huggingface.co/models/facebook/bart-large-mnli"
         self.api_key = settings.HUGGINGFACE_API_KEY
         self.headers = {"Authorization": f"Bearer {self.api_key}"} if self.api_key else {}
-        self.enabled = bool(self.api_key)
+        self.enabled = bool(settings.HUGGINGFACE_ENABLED and self.api_key)
+        self.disabled_reason = None
         
         self.candidate_labels = [
             "AI/ML",
@@ -22,7 +23,7 @@ class HuggingFaceService:
         ]
 
         if not self.enabled:
-            logger.warning("Hugging Face API Key is not set. Classification fallback will use rule-based default.")
+            logger.warning("Hugging Face remote classification is disabled. Classification fallback will use rule-based default.")
 
     async def classify_repository(self, name: str, description: str, topics: List[str]) -> str:
         # Prepare context to feed the model
@@ -46,7 +47,7 @@ class HuggingFaceService:
                     self.api_url,
                     json=payload,
                     headers=self.headers,
-                    timeout=10.0
+                    timeout=4.0
                 )
                 
                 if response.status_code == 200:
@@ -57,10 +58,20 @@ class HuggingFaceService:
                         return labels[0]
                 else:
                     logger.error(f"Hugging Face API returned status {response.status_code}: {response.text}")
+                    self._disable_remote(f"HTTP {response.status_code}")
+                    return self._heuristic_fallback(name, description, topics)
         except Exception as e:
             logger.error(f"Error during Hugging Face zero-shot classification: {str(e)}")
+            self._disable_remote(type(e).__name__)
+            return self._heuristic_fallback(name, description, topics)
 
         return self._heuristic_fallback(name, description, topics)
+
+    def _disable_remote(self, reason: str) -> None:
+        if self.enabled:
+            self.enabled = False
+            self.disabled_reason = reason
+            logger.warning(f"Disabling Hugging Face remote classification after failure: {reason}. Using heuristic fallback only.")
 
     def _heuristic_fallback(self, name: str, description: str, topics: List[str]) -> str:
         # Heuristics based on text keywords (case-insensitive)

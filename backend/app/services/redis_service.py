@@ -31,7 +31,7 @@ class RedisService:
                     self.url,
                     json=["GET", key],
                     headers=self.headers,
-                    timeout=5.0
+                    timeout=1.0
                 )
                 if response.status_code == 200:
                     data = response.json()
@@ -40,6 +40,7 @@ class RedisService:
                     logger.error(f"Redis GET failed with status {response.status_code}: {response.text}")
         except Exception as e:
             logger.error(f"Error querying Redis cache: {str(e)}")
+            self.enabled = False
         
         # Try local fallback on remote error
         return self._local_cache.get(key)
@@ -57,7 +58,7 @@ class RedisService:
                     self.url,
                     json=["SET", key, value, "EX", str(expire_seconds)],
                     headers=self.headers,
-                    timeout=5.0
+                    timeout=1.0
                 )
                 if response.status_code == 200:
                     return True
@@ -65,6 +66,7 @@ class RedisService:
                     logger.error(f"Redis SET failed with status {response.status_code}: {response.text}")
         except Exception as e:
             logger.error(f"Error saving to Redis cache: {str(e)}")
+            self.enabled = False
             
         return False
 

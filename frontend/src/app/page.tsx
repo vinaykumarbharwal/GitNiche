@@ -1,10 +1,14 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import SearchBar from '@/components/SearchBar';
 import Filters from '@/components/Filters';
 import RepoCard from '@/components/RepoCard';
 import { apiService, RepoResult } from '@/services/api';
+
+const matchesFilter = (selected: string, allValue: string, actual?: string | null) => {
+  return selected === allValue || actual?.toLowerCase() === selected.toLowerCase();
+};
 
 export default function Home() {
   const [query, setQuery] = useState('');
@@ -17,6 +21,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
 
   const [userId, setUserId] = useState<string | null>(null);
+  const requestIdRef = useRef(0);
 
   // Initialize user_id from localStorage
   useEffect(() => {
@@ -27,33 +32,46 @@ export default function Home() {
   const fetchRepos = useCallback(async (
     searchQuery: string,
     selectedDomain: string,
-    selectedLevel: string,
     selectedLang: string,
     currUserId: string | null
   ) => {
+    const requestId = requestIdRef.current + 1;
+    requestIdRef.current = requestId;
     setLoading(true);
     setError(null);
     try {
       const results = await apiService.searchRepositories({
         query: searchQuery,
         domain: selectedDomain,
-        experience_level: selectedLevel,
+        experience_level: undefined,
         language: selectedLang,
         user_id: currUserId || undefined
       });
+      if (requestId !== requestIdRef.current) return;
       setRepos(results);
     } catch (err: any) {
+      if (requestId !== requestIdRef.current) return;
       console.error(err);
       setError(err.message || 'Failed to load opportunities. Ensure the backend server is running.');
     } finally {
-      setLoading(false);
+      if (requestId === requestIdRef.current) {
+        setLoading(false);
+      }
     }
   }, []);
 
   // Search when variables change
   useEffect(() => {
-    fetchRepos(query, domain, level, language, userId);
-  }, [query, domain, level, language, userId, fetchRepos]);
+    fetchRepos(query, domain, language, userId);
+  }, [query, domain, language, userId, fetchRepos]);
+
+  const filteredRepos = repos.filter((repo) => {
+    return (
+      matchesFilter(domain, 'All Domains', repo.domain) &&
+      matchesFilter(level, 'All Levels', repo.difficulty_level) &&
+      matchesFilter(language, 'All Languages', repo.language)
+    );
+  });
 
   const handleSaveRepo = async (repo: RepoResult) => {
     const targetUserId = userId || '00000000-0000-0000-0000-000000000000';
@@ -102,7 +120,7 @@ export default function Home() {
           {/* Results Status */}
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
-              {loading ? 'Finding projects...' : `${repos.length} matches found`}
+              {loading ? 'Finding projects...' : `${filteredRepos.length} matches found`}
             </h3>
             
             {/* Show a reminder if using default mock account */}
@@ -127,7 +145,7 @@ export default function Home() {
               <h4 className="text-slate-200 font-bold mb-1">Server Connection Offline</h4>
               <p className="text-xs text-slate-400 max-w-sm">{error}</p>
             </div>
-          ) : repos.length === 0 ? (
+          ) : filteredRepos.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center py-20 border border-slate-900 rounded-2xl bg-slate-900/10 text-center">
               <svg className="w-12 h-12 text-slate-600 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" />
@@ -137,7 +155,7 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {repos.map((repo, idx) => (
+              {filteredRepos.map((repo, idx) => (
                 <RepoCard
                   key={`${repo.owner}-${repo.name}-${idx}`}
                   repo={repo}

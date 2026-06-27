@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     UPSTASH_REDIS_REST_TOKEN: str = ""
     
     # Hugging Face Inference API
+    HUGGINGFACE_ENABLED: bool = False
     HUGGINGFACE_API_KEY: str = ""
 
     class Config:
