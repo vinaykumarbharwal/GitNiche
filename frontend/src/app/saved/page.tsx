@@ -49,10 +49,10 @@ export default function SavedRepos() {
   const mapToRepoResult = (saved: SavedRepository): RepoResult => ({
     name: saved.repo_name,
     owner: saved.repo_owner,
-    description: 'Bookmarked opportunity.',
-    stars: 0,
-    forks: 0,
-    language: null,
+    description: saved.description || 'Bookmarked opportunity.',
+    stars: saved.stars || 0,
+    forks: saved.forks || 0,
+    language: saved.language || null,
     domain: saved.domain,
     difficulty_level: saved.difficulty,
     last_activity_date: saved.created_at,
@@ -99,7 +99,7 @@ export default function SavedRepos() {
               repo={mapToRepoResult(savedRepo)}
               isSaved={true}
               onUnsave={handleUnsaveRepo}
-              showStarsAndForks={false}
+              showStarsAndForks={true}
             />
           ))}
         </div>

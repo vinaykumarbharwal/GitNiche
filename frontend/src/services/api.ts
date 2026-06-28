@@ -70,6 +70,10 @@ export interface SavedRepository {
   difficulty: string;
   gitniche_score: number;
   created_at: string;
+  description?: string;
+  stars?: number;
+  forks?: number;
+  language?: string | null;
 }
 
 export interface PreferencesPayload {

@@ -21,7 +21,39 @@ async def save_repository(payload: SavedRepositoryCreate):
 @router.get("/saved-repos/{user_id}", response_model=List[SavedRepositoryResponse])
 async def get_saved_repositories(user_id: str):
     saved_repos = await supabase_service.get_saved_repositories(user_id)
-    return saved_repos
+    
+    import httpx
+    import asyncio
+    from app.services.github_service import github_service
+
+    async def enrich_repo(repo_dict):
+        repo = dict(repo_dict) if not hasattr(repo_dict, "__dict__") else repo_dict.__dict__
+        owner = repo.get("repo_owner")
+        name = repo.get("repo_name")
+        
+        repo["description"] = "Bookmarked opportunity."
+        repo["stars"] = 0
+        repo["forks"] = 0
+        repo["language"] = None
+        
+        try:
+            async with httpx.AsyncClient() as client:
+                url = f"https://api.github.com/repos/{owner}/{name}"
+                headers = github_service.headers
+                response = await client.get(url, headers=headers, timeout=3.0)
+                if response.status_code == 200:
+                    data = response.json()
+                    repo["description"] = data.get("description") or ""
+                    repo["stars"] = data.get("stargazers_count", 0)
+                    repo["forks"] = data.get("forks_count", 0)
+                    repo["language"] = data.get("language")
+        except Exception:
+            pass
+        return repo
+
+    tasks = [enrich_repo(r) for r in saved_repos]
+    enriched = await asyncio.gather(*tasks)
+    return enriched
 
 @router.delete("/saved-repos")
 async def unsave_repository(

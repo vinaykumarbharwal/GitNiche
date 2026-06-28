@@ -198,8 +198,8 @@ export default function PreferencesForm({ onSaveSuccess }: PreferencesFormProps)
 
         <div>
           <div className="mb-2 text-sm font-medium text-[#24292f]">Target difficulty</div>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {['Beginner-Friendly', 'Advanced'].map((level) => (
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            {['Beginner-Friendly', 'Intermediate', 'Advanced'].map((level) => (
               <button type="button" key={level} onClick={() => setExperienceLevel(level)} className={`rounded-md border px-3 py-2 text-sm font-medium ${experienceLevel === level ? 'border-[#0969da] bg-[#ddf4ff] text-[#0969da]' : 'border-[#d0d7de] bg-[#f6f8fa] text-[#24292f] hover:bg-white'}`}>{level}</button>
             ))}
           </div>

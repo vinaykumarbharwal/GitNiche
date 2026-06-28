@@ -20,7 +20,7 @@ export default function AboutPage() {
           <div className="rounded-md border border-[#d0d7de] bg-[#f6f8fa] p-4">
             <h2 className="text-sm font-semibold text-[#24292f]">2) Match your level</h2>
             <p className="mt-2 text-xs leading-5 text-[#57606a]">
-              Beginner-Friendly or Advanced. Your call. Your pace.
+              Beginner-Friendly, Intermediate, or Advanced. Your call. Your pace.
             </p>
           </div>
           <div className="rounded-md border border-[#d0d7de] bg-[#f6f8fa] p-4">

@@ -65,6 +65,10 @@ class SavedRepositoryResponse(BaseModel):
     difficulty: str
     gitniche_score: int
     created_at: datetime
+    description: Optional[str] = None
+    stars: int = 0
+    forks: int = 0
+    language: Optional[str] = None
 
     class Config:
         from_attributes = True

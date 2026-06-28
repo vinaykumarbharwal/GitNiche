@@ -18,7 +18,7 @@ export default function Filters({
   onChangeLanguage,
 }: FiltersProps) {
   const domains = ['All Domains', 'AI/ML', 'Blockchain', 'Cybersecurity', 'Web Development', 'DevOps', 'Cloud'];
-  const levels = ['All Levels', 'Beginner-Friendly', 'Advanced'];
+  const levels = ['All Levels', 'Beginner-Friendly', 'Intermediate', 'Advanced'];
   const languages = ['All Languages', 'TypeScript', 'Python', 'Rust', 'Go', 'JavaScript', 'Java', 'C++', 'Ruby'];
 
   const selectClass = 'w-full rounded-md border border-[#d0d7de] bg-[#f6f8fa] px-3 py-2 text-sm text-[#24292f] outline-none focus:border-[#0969da] focus:bg-white focus:ring-2 focus:ring-[#0969da]/20';
