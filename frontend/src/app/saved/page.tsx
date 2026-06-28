@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import RepoCard from '@/components/RepoCard';
+import RepoCardSkeleton from '@/components/RepoCardSkeleton';
 import { apiService, authStorage, GUEST_USER_ID, RepoResult, SavedRepository } from '@/services/api';
 import Link from 'next/link';
 
@@ -64,31 +65,32 @@ export default function SavedRepos() {
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-6 flex flex-col gap-4 border-b border-[#d8dee4] pb-6 sm:flex-row sm:items-end sm:justify-between">
+      <div className="mb-6 flex flex-col gap-4 border-b border-border-divider pb-6 sm:flex-row sm:items-end sm:justify-between transition duration-200">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-[#24292f]">Saved repositories</h1>
-          <p className="mt-2 text-sm text-[#57606a]">Showing saved opportunities for <span className="font-semibold text-[#0969da]">{username}</span>.</p>
+          <h1 className="text-3xl font-semibold tracking-tight text-text-primary">Saved repositories</h1>
+          <p className="mt-2 text-sm text-text-secondary">Showing saved opportunities for <span className="font-semibold text-[#0969da] dark:text-[#58a6ff]">{username}</span>.</p>
         </div>
-        <Link href="/" className="w-fit rounded-md border border-[#d0d7de] bg-[#f6f8fa] px-3 py-1.5 text-sm font-semibold text-[#24292f] hover:bg-white">
+        <Link href="/" className="w-fit rounded-md border border-border-color bg-bg-btn px-3 py-1.5 text-sm font-semibold text-text-primary hover:bg-bg-card transition duration-200">
           Back to Explore
         </Link>
       </div>
 
       {loading ? (
-        <div className="flex flex-1 flex-col items-center justify-center gap-4 py-20">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#d0d7de] border-t-[#0969da]" />
-          <p className="text-sm text-[#57606a]">Retrieving saved repositories...</p>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {Array.from({ length: 3 }).map((_, idx) => (
+            <RepoCardSkeleton key={idx} />
+          ))}
         </div>
       ) : error ? (
-        <div className="flex flex-1 flex-col items-center justify-center rounded-md border border-[#ff8182] bg-[#ffebe9] px-4 py-16 text-center">
-          <h4 className="mb-1 font-semibold text-[#24292f]">Failed to load bookmarks</h4>
-          <p className="max-w-sm text-sm text-[#57606a]">{error}</p>
+        <div className="flex flex-1 flex-col items-center justify-center rounded-md border border-[#ff8182] bg-[#ffebe9] dark:border-[#f85149]/40 dark:bg-[#f85149]/10 px-4 py-16 text-center transition duration-200">
+          <h4 className="mb-1 font-semibold text-text-primary">Failed to load bookmarks</h4>
+          <p className="max-w-sm text-sm text-text-secondary">{error}</p>
         </div>
       ) : savedList.length === 0 ? (
-        <div className="flex flex-1 flex-col items-center justify-center rounded-md border border-[#d0d7de] bg-white px-4 py-24 text-center shadow-sm">
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-[#d0d7de] bg-[#f6f8fa] text-lg font-semibold text-[#57606a]">*</div>
-          <h3 className="mb-1 text-lg font-semibold text-[#24292f]">No saved repositories yet</h3>
-          <p className="mb-6 max-w-sm text-sm text-[#57606a]">Save repositories from Explore and they will appear here.</p>
+        <div className="flex flex-1 flex-col items-center justify-center rounded-md border border-border-color bg-bg-card px-4 py-24 text-center shadow-sm transition duration-200">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-border-color bg-bg-btn text-lg font-semibold text-text-secondary">*</div>
+          <h3 className="mb-1 text-lg font-semibold text-text-primary">No saved repositories yet</h3>
+          <p className="mb-6 max-w-sm text-sm text-text-secondary">Save repositories from Explore and they will appear here.</p>
           <Link href="/" className="rounded-md bg-[#2da44e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#2c974b]">Explore projects</Link>
         </div>
       ) : (

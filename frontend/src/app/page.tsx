@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import SearchBar from '@/components/SearchBar';
 import Filters from '@/components/Filters';
 import RepoCard from '@/components/RepoCard';
+import RepoCardSkeleton from '@/components/RepoCardSkeleton';
 import { apiService, authStorage, GUEST_USER_ID, RepoResult } from '@/services/api';
 
 function getErrorMessage(err: unknown, fallback: string) {
@@ -128,12 +129,12 @@ export default function Home() {
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
       {/* Hero Header */}
-      <div className="mb-6 border-b border-[#d8dee4] pb-6">
-        <h1 className="mb-2 text-3xl font-semibold tracking-tight text-[#24292f] sm:text-4xl">
+      <div className="mb-6 border-b border-border-divider pb-6 transition duration-200">
+        <h1 className="mb-2 text-3xl font-semibold tracking-tight text-text-primary sm:text-4xl">
           Discover Your Next
-          <span className="block text-[#0969da]">Open Source Contribution</span>
+          <span className="block text-[#0969da] dark:text-[#58a6ff]">Open Source Contribution</span>
         </h1>
-        <p className="max-w-2xl text-sm leading-6 text-[#57606a] sm:text-base">
+        <p className="max-w-2xl text-sm leading-6 text-text-secondary sm:text-base">
           GitNiche uses AI-assisted labeling to find active, beginner-friendly GitHub repositories customized to your skills and career objectives.
         </p>
       </div>
@@ -155,13 +156,13 @@ export default function Home() {
         <div className="flex w-full flex-1 flex-col">
           {/* Results Status */}
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <h3 className="text-sm font-semibold text-[#24292f]">
+            <h3 className="text-sm font-semibold text-text-primary">
               {loading ? 'Finding projects...' : `${filteredRepos.length} matches found`}
             </h3>
             
             {/* Show a reminder if using default mock account */}
             {userId === GUEST_USER_ID && (
-              <span className="rounded-full border border-[#d0d7de] bg-[#f6f8fa] px-2.5 py-1 text-xs text-[#57606a]">
+              <span className="rounded-full border border-border-color bg-bg-btn px-2.5 py-1 text-xs text-text-secondary transition duration-200">
                 Browsing as guest. Sign in with GitHub to save your profile.
               </span>
             )}
@@ -169,25 +170,26 @@ export default function Home() {
 
           {/* Loader, Error, or Results Grid */}
           {loading ? (
-            <div className="flex-1 flex flex-col items-center justify-center py-20 gap-4">
-              <div className="w-10 h-10 border-4 border-[#d0d7de] border-t-[#0969da] rounded-full animate-spin"></div>
-              <p className="text-xs text-[#57606a]">Classifying domains & calculating GitNiche scores...</p>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, idx) => (
+                <RepoCardSkeleton key={idx} />
+              ))}
             </div>
           ) : error ? (
-            <div className="flex-1 flex flex-col items-center justify-center py-16 px-4 rounded-md border border-[#ff8182] bg-[#ffebe9] text-center">
-              <svg className="w-12 h-12 text-[#cf222e] mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <div className="flex-1 flex flex-col items-center justify-center py-16 px-4 rounded-md border border-[#ff8182] bg-[#ffebe9] dark:border-[#f85149]/40 dark:bg-[#f85149]/10 text-center transition duration-200">
+              <svg className="w-12 h-12 text-[#cf222e] dark:text-[#ff7b72] mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
-              <h4 className="text-[#24292f] font-bold mb-1">Server Connection Offline</h4>
-              <p className="text-xs text-[#57606a] max-w-sm">{error}</p>
+              <h4 className="text-text-primary font-bold mb-1">Server Connection Offline</h4>
+              <p className="text-xs text-text-secondary max-w-sm">{error}</p>
             </div>
           ) : filteredRepos.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center py-20 rounded-md border border-[#d0d7de] bg-white text-center">
-              <svg className="w-12 h-12 text-[#6e7781] mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <div className="flex-1 flex flex-col items-center justify-center py-20 rounded-md border border-border-color bg-bg-card text-center transition duration-200">
+              <svg className="w-12 h-12 text-text-secondary mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" />
               </svg>
-              <h4 className="text-[#24292f] font-bold mb-1">No matches found</h4>
-              <p className="text-xs text-[#57606a] max-w-xs">Try broadening your search query or loosening your filter criteria.</p>
+              <h4 className="text-text-primary font-bold mb-1">No matches found</h4>
+              <p className="text-xs text-text-secondary max-w-xs">Try broadening your search query or loosening your filter criteria.</p>
             </div>
           ) : (
             <>
@@ -204,19 +206,19 @@ export default function Home() {
 
               {/* Pagination Controls */}
               {totalPages > 1 && (
-                <div className="mt-8 flex items-center justify-center gap-4 border-t border-[#d8dee4] pt-6">
+                <div className="mt-8 flex items-center justify-center gap-4 border-t border-border-divider pt-6 transition duration-200">
                   <button
                     onClick={() => {
                       setCurrentPage((p) => Math.max(1, p - 1));
                       window.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
                     disabled={currentPage === 1}
-                    className="rounded-md border border-[#d0d7de] bg-white px-4 py-2 text-sm font-semibold text-[#24292f] hover:bg-[#f6f8fa] disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                    className="rounded-md border border-border-color bg-bg-card px-4 py-2 text-sm font-semibold text-text-primary hover:bg-bg-btn disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
                   >
                     Previous
                   </button>
-                  <span className="text-sm text-[#57606a]">
-                    Page <span className="font-semibold text-[#24292f]">{currentPage}</span> of <span className="font-semibold text-[#24292f]">{totalPages}</span>
+                  <span className="text-sm text-text-secondary">
+                    Page <span className="font-semibold text-text-primary">{currentPage}</span> of <span className="font-semibold text-text-primary">{totalPages}</span>
                   </span>
                   <button
                     onClick={() => {
@@ -224,7 +226,7 @@ export default function Home() {
                       window.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
                     disabled={currentPage === totalPages}
-                    className="rounded-md border border-[#d0d7de] bg-white px-4 py-2 text-sm font-semibold text-[#24292f] hover:bg-[#f6f8fa] disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                    className="rounded-md border border-border-color bg-bg-card px-4 py-2 text-sm font-semibold text-text-primary hover:bg-bg-btn disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
                   >
                     Next
                   </button>

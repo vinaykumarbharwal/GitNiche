@@ -16,10 +16,29 @@ function GitHubMark({ className = 'h-8 w-8' }: { className?: string }) {
 export default function Navbar() {
   const pathname = usePathname();
   const [session, setSession] = useState<AuthSession | null>(null);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
     setSession(authStorage.getSession());
   }, [pathname]);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
+    if (savedTheme) {
+      setTheme(savedTheme);
+      document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      setTheme('dark');
+      document.documentElement.classList.add('dark');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(nextTheme);
+    localStorage.setItem('theme', nextTheme);
+    document.documentElement.classList.toggle('dark', nextTheme === 'dark');
+  };
 
   const isLinkActive = (path: string) => (
     pathname === path || (path !== '/' && pathname.startsWith(`${path}/`))
@@ -52,6 +71,24 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Theme Toggle Button */}
+            <button
+              onClick={toggleTheme}
+              className="rounded-md border border-[#57606a] bg-transparent p-2 text-[#f0f6fc] hover:bg-[#30363d] focus:outline-none transition cursor-pointer"
+              aria-label="Toggle theme"
+            >
+              {theme === 'light' ? (
+                // Moon Icon
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              ) : (
+                // Sun Icon
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+                </svg>
+              )}
+            </button>
             {session ? (
               <>
                 <div className="flex min-w-0 items-center gap-2 rounded-md border border-[#57606a] bg-[#1f2328] px-2 py-1">
