@@ -201,6 +201,67 @@ class GitHubService:
         else:
             logger.warning("GitHub API configured without token. API rate limit will be constrained.")
 
+    async def validate_user_identity(self, username: str, email: str) -> Dict[str, Any]:
+        normalized_username = (username or "").strip()
+        normalized_email = (email or "").strip().lower()
+
+        email_format_valid = bool(normalized_email) and ("@" in normalized_email and "." in normalized_email.split("@")[-1])
+        default_result = {
+            "username_exists": False,
+            "email_format_valid": email_format_valid,
+            "email_matches_public_profile": None,
+            "email_verification_note": "Unable to validate against GitHub right now.",
+            "profile_url": None,
+        }
+
+        if not normalized_username:
+            default_result["email_verification_note"] = "Enter a GitHub username to validate."
+            return default_result
+
+        try:
+            async with httpx.AsyncClient(timeout=8) as client:
+                response = await client.get(
+                    f"https://api.github.com/users/{normalized_username}",
+                    headers=self.headers,
+                )
+        except Exception as e:
+            logger.warning(f"GitHub identity validation request failed for {normalized_username}: {str(e)}")
+            return default_result
+
+        if response.status_code == 404:
+            default_result["email_verification_note"] = "GitHub username was not found."
+            return default_result
+
+        if response.status_code != 200:
+            default_result["email_verification_note"] = "GitHub verification is temporarily unavailable."
+            return default_result
+
+        profile = response.json()
+        public_email = (profile.get("email") or "").strip().lower()
+
+        email_matches_public_profile: bool | None = None
+        note = "GitHub account found."
+
+        if not email_format_valid:
+            note = "GitHub account found, but email format is invalid."
+        elif public_email:
+            email_matches_public_profile = public_email == normalized_email
+            note = (
+                "Email matches the public GitHub email."
+                if email_matches_public_profile
+                else "Email does not match the public GitHub email."
+            )
+        else:
+            note = "GitHub account found. Email cannot be fully verified because the profile email is private."
+
+        return {
+            "username_exists": True,
+            "email_format_valid": email_format_valid,
+            "email_matches_public_profile": email_matches_public_profile,
+            "email_verification_note": note,
+            "profile_url": profile.get("html_url"),
+        }
+
     async def search_repositories(
         self,
         query: str,

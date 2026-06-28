@@ -22,6 +22,17 @@ export default function RootLayout({
         <footer className="border-t border-[#d0d7de] bg-white py-6 text-center text-xs text-[#57606a] mt-auto">
           <div className="max-w-7xl mx-auto px-4">
             <p>(c) {new Date().getFullYear()} GitNiche. Find open-source work faster.</p>
+            <p className="mt-1">
+              Built by Vinay Kumar |{' '}
+              <a
+                href="https://github.com/vinaykumarbharwal"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-[#0969da] hover:underline"
+              >
+                GitHub
+              </a>
+            </p>
           </div>
         </footer>
       </body>

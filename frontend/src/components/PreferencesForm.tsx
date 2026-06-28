@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { apiService, authStorage, PreferencesPayload } from '@/services/api';
+import { apiService, authStorage, GitHubIdentityValidation, PreferencesPayload } from '@/services/api';
 
 function getErrorMessage(err: unknown, fallback: string) {
   return err instanceof Error ? err.message : fallback;
@@ -12,6 +12,7 @@ interface PreferencesFormProps {
 }
 
 export default function PreferencesForm({ onSaveSuccess }: PreferencesFormProps) {
+  const [hasLoadedInitialSession, setHasLoadedInitialSession] = useState(false);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [selectedDomains, setSelectedDomains] = useState<string[]>([]);
@@ -20,6 +21,9 @@ export default function PreferencesForm({ onSaveSuccess }: PreferencesFormProps)
   const [careerGoal, setCareerGoal] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ text: string; isError: boolean } | null>(null);
+  const [validationLoading, setValidationLoading] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const [identityValidation, setIdentityValidation] = useState<GitHubIdentityValidation | null>(null);
 
   const domains = ['AI/ML', 'Blockchain', 'Cybersecurity', 'Web Development', 'DevOps', 'Cloud'];
   const languages = ['TypeScript', 'Python', 'Rust', 'Go', 'JavaScript', 'Java', 'C++', 'Ruby'];
@@ -32,6 +36,7 @@ export default function PreferencesForm({ onSaveSuccess }: PreferencesFormProps)
       setLoading(true);
       apiService.getPreferences(session.user_id)
         .then((pref) => {
+          if (!pref) return;
           setSelectedDomains(pref.domains || []);
           setSelectedLanguages(pref.languages || []);
           setExperienceLevel(pref.experience_level || 'Beginner-Friendly');
@@ -40,7 +45,52 @@ export default function PreferencesForm({ onSaveSuccess }: PreferencesFormProps)
         .catch((err) => console.error('Could not fetch preferences on mount', err))
         .finally(() => setLoading(false));
     }
+    setHasLoadedInitialSession(true);
   }, []);
+
+  useEffect(() => {
+    if (!hasLoadedInitialSession) return;
+
+    const trimmedUsername = username.trim();
+    const trimmedEmail = email.trim();
+
+    if (!trimmedUsername || !trimmedEmail) {
+      setIdentityValidation(null);
+      setValidationError(null);
+      setValidationLoading(false);
+      return;
+    }
+
+    const timer = window.setTimeout(async () => {
+      setValidationLoading(true);
+      setValidationError(null);
+
+      try {
+        const result = await apiService.validateGitHubIdentity(trimmedUsername, trimmedEmail);
+        setIdentityValidation(result);
+      } catch (err: unknown) {
+        setValidationError(getErrorMessage(err, 'Unable to verify GitHub identity right now.'));
+      } finally {
+        setValidationLoading(false);
+      }
+    }, 500);
+
+    return () => window.clearTimeout(timer);
+  }, [username, email, hasLoadedInitialSession]);
+
+  const canSubmitIdentity = (() => {
+    if (!username.trim() || !email.trim()) return false;
+    if (validationLoading) return false;
+
+    // Do not block saving when verification service is unavailable.
+    if (!identityValidation) return true;
+
+    if (!identityValidation.username_exists) return false;
+    if (!identityValidation.email_format_valid) return false;
+
+    // Email mismatch with public GitHub profile is informational only.
+    return true;
+  })();
 
   const toggleValue = (value: string, values: string[], setter: (next: string[]) => void) => {
     setter(values.includes(value) ? values.filter((item) => item !== value) : [...values, value]);
@@ -50,6 +100,11 @@ export default function PreferencesForm({ onSaveSuccess }: PreferencesFormProps)
     e.preventDefault();
     if (!username || !email) {
       setMessage({ text: 'Please provide both a GitHub username and an email.', isError: true });
+      return;
+    }
+
+    if (!canSubmitIdentity) {
+      setMessage({ text: 'Please provide a valid GitHub username and email format before saving.', isError: true });
       return;
     }
 
@@ -97,12 +152,29 @@ export default function PreferencesForm({ onSaveSuccess }: PreferencesFormProps)
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium text-[#24292f]">GitHub username</span>
             <input type="text" required value={username} onChange={(e) => setUsername(e.target.value)} placeholder="octocat" className={fieldClass} />
+            {identityValidation && (
+              <span className={`text-xs ${identityValidation.username_exists ? 'text-[#116329]' : 'text-[#cf222e]'}`}>
+                {identityValidation.username_exists ? 'GitHub username found.' : 'GitHub username not found.'}
+              </span>
+            )}
           </label>
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium text-[#24292f]">Email</span>
             <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="dev@example.com" className={fieldClass} />
+            {identityValidation && (
+              <span className={`text-xs ${identityValidation.email_format_valid ? 'text-[#116329]' : 'text-[#cf222e]'}`}>
+                {identityValidation.email_verification_note}
+              </span>
+            )}
           </label>
         </div>
+
+        {(validationLoading || validationError) && (
+          <div className="-mt-2 text-xs">
+            {validationLoading && <span className="text-[#57606a]">Verifying GitHub identity...</span>}
+            {!validationLoading && validationError && <span className="text-[#cf222e]">{validationError}</span>}
+          </div>
+        )}
 
         <div className="border-t border-[#d8dee4] pt-5">
           <div className="mb-2 text-sm font-medium text-[#24292f]">Preferred domains</div>
@@ -139,7 +211,7 @@ export default function PreferencesForm({ onSaveSuccess }: PreferencesFormProps)
         </label>
 
         <div className="flex flex-col gap-3 border-t border-[#d8dee4] pt-5 sm:flex-row sm:items-center">
-          <button type="submit" disabled={loading} className="rounded-md bg-[#2da44e] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#2c974b] disabled:opacity-60">
+          <button type="submit" disabled={loading || !canSubmitIdentity} className="rounded-md bg-[#2da44e] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#2c974b] disabled:opacity-60">
             {loading ? 'Saving...' : 'Save preferences'}
           </button>
           {message && <span className={`text-sm font-medium ${message.isError ? 'text-[#cf222e]' : 'text-[#116329]'}`}>{message.text}</span>}

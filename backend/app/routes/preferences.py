@@ -1,8 +1,16 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Query, status
 from app.schemas import PreferencesRequest, UserPreferencesResponse
+from app.services.github_service import github_service
 from app.services.supabase_service import supabase_service
 
 router = APIRouter()
+
+@router.get("/preferences/validate-github")
+async def validate_github_identity(
+    username: str = Query(..., min_length=1),
+    email: str = Query(..., min_length=3),
+):
+    return await github_service.validate_user_identity(username=username, email=email)
 
 @router.post("/preferences")
 async def save_user_preferences(payload: PreferencesRequest):

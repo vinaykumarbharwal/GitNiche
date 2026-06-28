@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import RepoCard from '@/components/RepoCard';
-import { apiService, authStorage, RepoResult, SavedRepository } from '@/services/api';
+import { apiService, authStorage, GUEST_USER_ID, RepoResult, SavedRepository } from '@/services/api';
 import Link from 'next/link';
 
 function getErrorMessage(err: unknown, fallback: string) {
@@ -14,17 +14,19 @@ export default function SavedRepos() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [username, setUsername] = useState<string | null>(null);
+  const [savedUserId, setSavedUserId] = useState<string>(GUEST_USER_ID);
 
   useEffect(() => {
     const session = authStorage.getSession();
-    const savedUserId = session?.user_id || '00000000-0000-0000-0000-000000000000';
+    const resolvedUserId = session?.user_id || GUEST_USER_ID;
+    setSavedUserId(resolvedUserId);
     setUsername(session?.username || 'Guest');
 
     const fetchSaved = async () => {
       setLoading(true);
       setError(null);
       try {
-        const results = await apiService.getSavedRepositories(savedUserId);
+        const results = await apiService.getSavedRepositories(resolvedUserId);
         setSavedList(results);
       } catch (err: unknown) {
         console.error(err);
@@ -36,6 +38,13 @@ export default function SavedRepos() {
 
     fetchSaved();
   }, []);
+
+  const handleUnsaveRepo = async (repo: RepoResult) => {
+    await apiService.unsaveRepository(savedUserId, repo.owner, repo.name);
+    setSavedList((prev) => prev.filter(
+      (savedRepo) => !(savedRepo.repo_owner === repo.owner && savedRepo.repo_name === repo.name)
+    ));
+  };
 
   const mapToRepoResult = (saved: SavedRepository): RepoResult => ({
     name: saved.repo_name,
@@ -85,7 +94,13 @@ export default function SavedRepos() {
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {savedList.map((savedRepo) => (
-            <RepoCard key={savedRepo.id} repo={mapToRepoResult(savedRepo)} isSaved={true} />
+            <RepoCard
+              key={savedRepo.id}
+              repo={mapToRepoResult(savedRepo)}
+              isSaved={true}
+              onUnsave={handleUnsaveRepo}
+              showStarsAndForks={false}
+            />
           ))}
         </div>
       )}

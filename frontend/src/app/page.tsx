@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import SearchBar from '@/components/SearchBar';
 import Filters from '@/components/Filters';
 import RepoCard from '@/components/RepoCard';
-import { apiService, authStorage, RepoResult } from '@/services/api';
+import { apiService, authStorage, GUEST_USER_ID, RepoResult } from '@/services/api';
 
 function getErrorMessage(err: unknown, fallback: string) {
   return err instanceof Error ? err.message : fallback;
@@ -15,6 +16,7 @@ const matchesFilter = (selected: string, allValue: string, actual?: string | nul
 };
 
 export default function Home() {
+  const pathname = usePathname();
   const [query, setQuery] = useState('');
   const [domain, setDomain] = useState('All Domains');
   const [level, setLevel] = useState('All Levels');
@@ -25,13 +27,28 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
 
   const [userId, setUserId] = useState<string | null>(null);
+  const [savedRepoIds, setSavedRepoIds] = useState<Set<string>>(new Set());
   const requestIdRef = useRef(0);
 
   // Initialize user_id from localStorage
   useEffect(() => {
     const session = authStorage.getSession();
-    setUserId(session?.user_id || '00000000-0000-0000-0000-000000000000');
+    setUserId(session?.user_id || GUEST_USER_ID);
   }, []);
+
+  // Fetch saved repositories to track save state on Explore page
+  useEffect(() => {
+    if (!userId) return;
+    const fetchSaved = async () => {
+      try {
+        const saved = await apiService.getSavedRepositories(userId);
+        setSavedRepoIds(new Set(saved.map(r => `${r.repo_owner}/${r.repo_name}`.toLowerCase())));
+      } catch (err) {
+        console.error('Failed to load saved repos in Explore page:', err);
+      }
+    };
+    fetchSaved();
+  }, [userId, pathname]);
 
   const fetchRepos = useCallback(async (
     searchQuery: string,
@@ -78,7 +95,7 @@ export default function Home() {
   });
 
   const handleSaveRepo = async (repo: RepoResult) => {
-    const targetUserId = userId || '00000000-0000-0000-0000-000000000000';
+    const targetUserId = userId || GUEST_USER_ID;
     
     await apiService.saveRepository({
       user_id: targetUserId,
@@ -88,6 +105,12 @@ export default function Home() {
       domain: repo.domain,
       difficulty: repo.difficulty_level,
       gitniche_score: repo.gitniche_score,
+    });
+
+    setSavedRepoIds(prev => {
+      const next = new Set(prev);
+      next.add(`${repo.owner}/${repo.name}`.toLowerCase());
+      return next;
     });
   };
 
@@ -126,7 +149,7 @@ export default function Home() {
             </h3>
             
             {/* Show a reminder if using default mock account */}
-            {userId === '00000000-0000-0000-0000-000000000000' && (
+            {userId === GUEST_USER_ID && (
               <span className="rounded-full border border-[#d0d7de] bg-[#f6f8fa] px-2.5 py-1 text-xs text-[#57606a]">
                 Browsing as guest. Sign in with GitHub to save your profile.
               </span>
@@ -161,6 +184,7 @@ export default function Home() {
                 <RepoCard
                   key={`${repo.owner}-${repo.name}-${idx}`}
                   repo={repo}
+                  isSaved={savedRepoIds.has(`${repo.owner}/${repo.name}`.toLowerCase())}
                   onSave={handleSaveRepo}
                 />
               ))}

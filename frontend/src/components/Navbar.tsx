@@ -22,7 +22,7 @@ export default function Navbar() {
   }, [pathname]);
 
   const isLinkActive = (path: string) => (
-    pathname === path
+    pathname === path || (path !== '/' && pathname.startsWith(`${path}/`))
       ? 'text-white bg-[#316dca]'
       : 'text-[#f0f6fc] hover:bg-[#30363d]'
   );
@@ -48,7 +48,7 @@ export default function Navbar() {
           <div className="flex flex-1 flex-wrap items-center gap-2 md:gap-1">
             <Link href="/" className={`${isLinkActive('/')} rounded-md px-3 py-1.5 text-sm font-medium transition`}>Explore</Link>
             <Link href="/saved" className={`${isLinkActive('/saved')} rounded-md px-3 py-1.5 text-sm font-medium transition`}>Saved</Link>
-            <Link href="/profile" className={`${isLinkActive('/profile')} rounded-md px-3 py-1.5 text-sm font-medium transition`}>Preferences</Link>
+            <Link href="/about" className={`${isLinkActive('/about')} rounded-md px-3 py-1.5 text-sm font-medium transition`}>About</Link>
           </div>
 
           <div className="flex items-center gap-3">
