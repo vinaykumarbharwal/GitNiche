@@ -191,7 +191,7 @@ export default function Home() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
                 {paginatedRepos.map((repo, idx) => (
                   <RepoCard
                     key={`${repo.owner}-${repo.name}-${idx}`}
