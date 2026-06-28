@@ -45,6 +45,17 @@ class SupabaseService:
             "created_at": datetime.utcnow()
         }
 
+    def _handle_db_error(self, method_name: str, exception: Exception):
+        err_msg = str(exception)
+        if "PGRST205" in err_msg or "schema cache" in err_msg or "PGRST204" in err_msg:
+            logger.warning(
+                f"Supabase database schema is missing tables. Disabling Supabase client for this session and "
+                f"falling back to local memory. Error details: {err_msg}"
+            )
+            self.enabled = False
+        else:
+            logger.warning(f"Supabase database error in {method_name}: {err_msg}. Falling back to memory.")
+
     async def get_or_create_user(self, github_username: str, email: str) -> Dict[str, Any]:
         if not self.enabled:
             # Check mock users
@@ -77,7 +88,7 @@ class SupabaseService:
             if insert_resp.data:
                 return insert_resp.data[0]
         except Exception as e:
-            logger.error(f"Supabase error in get_or_create_user: {str(e)}")
+            self._handle_db_error("get_or_create_user", e)
             
         # Fallback to creating a local user on error
         uid = str(uuid.uuid4())
@@ -123,7 +134,7 @@ class SupabaseService:
             if resp.data:
                 return resp.data[0]
         except Exception as e:
-            logger.error(f"Supabase error in save_preferences: {str(e)}")
+            self._handle_db_error("save_preferences", e)
 
         # Fallback to local memory on error
         self._mock_preferences[user_id] = {**pref_data, "id": str(uuid.uuid4()), "created_at": datetime.utcnow()}
@@ -138,7 +149,7 @@ class SupabaseService:
             if resp.data:
                 return resp.data[0]
         except Exception as e:
-            logger.error(f"Supabase error in get_preferences: {str(e)}")
+            self._handle_db_error("get_preferences", e)
 
         return self._mock_preferences.get(user_id)
 
@@ -185,7 +196,7 @@ class SupabaseService:
             if resp.data:
                 return resp.data[0]
         except Exception as e:
-            logger.error(f"Supabase error in save_repository: {str(e)}")
+            self._handle_db_error("save_repository", e)
 
         # Fallback to local memory on error
         new_repo = {**repo_data, "id": str(uuid.uuid4()), "created_at": datetime.utcnow()}
@@ -201,7 +212,7 @@ class SupabaseService:
             if resp.data:
                 return resp.data
         except Exception as e:
-            logger.error(f"Supabase error in get_saved_repositories: {str(e)}")
+            self._handle_db_error("get_saved_repositories", e)
 
         return [r for r in self._mock_saved_repos if r["user_id"] == user_id]
 
@@ -234,7 +245,7 @@ class SupabaseService:
                 .eq("repo_name", repo_name).execute()
             return True
         except Exception as e:
-            logger.error(f"Supabase error in unsave_repository: {str(e)}")
+            self._handle_db_error("unsave_repository", e)
 
         # Try fallback on exception
         before_len = len(self._mock_saved_repos)
@@ -258,6 +269,6 @@ class SupabaseService:
         try:
             self.client.table("search_history").insert(search_data).execute()
         except Exception as e:
-            logger.error(f"Supabase error in save_search_history: {str(e)}")
+            self._handle_db_error("save_search_history", e)
 
 supabase_service = SupabaseService()
