@@ -70,7 +70,7 @@ export default function Navbar() {
             ) : (
               <a href={apiService.getGitHubLoginUrl()} className="inline-flex items-center gap-2 rounded-md bg-[#2da44e] px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-[#2c974b]">
                 <GitHubMark className="h-4 w-4" />
-                Sign in with GitHub
+                Continue with GitHub
               </a>
             )}
           </div>

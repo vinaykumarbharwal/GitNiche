@@ -13,10 +13,8 @@ router = APIRouter()
 @router.get("/auth/github/login")
 async def github_login():
     if not settings.GITHUB_CLIENT_ID:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="GitHub OAuth is not configured. Set GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET.",
-        )
+        message = "GitHub OAuth is not configured. Set GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET in backend/.env."
+        return RedirectResponse(f"{settings.FRONTEND_URL}/auth/callback?{urlencode({'error': message})}")
 
     params = urlencode({
         "client_id": settings.GITHUB_CLIENT_ID,
@@ -28,11 +26,23 @@ async def github_login():
 
 
 @router.get("/auth/github/callback")
-async def github_callback(code: str = Query(...)):
+async def github_callback(
+    code: str | None = Query(default=None),
+    error: str | None = Query(default=None),
+    error_description: str | None = Query(default=None),
+):
+    if error:
+        message = error_description or error
+        return RedirectResponse(f"{settings.FRONTEND_URL}/auth/callback?{urlencode({'error': message})}")
+
+    if not code:
+        return RedirectResponse(
+            f"{settings.FRONTEND_URL}/auth/callback?{urlencode({'error': 'Missing GitHub authorization code.'})}"
+        )
+
     if not settings.GITHUB_CLIENT_ID or not settings.GITHUB_CLIENT_SECRET:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="GitHub OAuth is not configured.",
+        return RedirectResponse(
+            f"{settings.FRONTEND_URL}/auth/callback?{urlencode({'error': 'GitHub OAuth is not configured on the backend.'})}"
         )
 
     async with httpx.AsyncClient(timeout=15) as client:

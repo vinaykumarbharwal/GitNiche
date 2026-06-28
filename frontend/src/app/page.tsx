@@ -53,12 +53,8 @@ export default function Home() {
       });
       if (requestId !== requestIdRef.current) return;
       setRepos(results);
-<<<<<<< HEAD
-    } catch (err: any) {
-      if (requestId !== requestIdRef.current) return;
-=======
     } catch (err: unknown) {
->>>>>>> 1ea804c59ee27420d04fd4d680c35225173ee1dc
+      if (requestId !== requestIdRef.current) return;
       console.error(err);
       setError(getErrorMessage(err, 'Failed to load opportunities. Ensure the backend server is running.')); 
     } finally {
@@ -124,15 +120,9 @@ export default function Home() {
 
         <div className="flex w-full flex-1 flex-col">
           {/* Results Status */}
-<<<<<<< HEAD
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
-              {loading ? 'Finding projects...' : `${filteredRepos.length} matches found`}
-=======
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="text-sm font-semibold text-[#24292f]">
-              {loading ? 'Finding projects...' : `${repos.length} matches found`}
->>>>>>> 1ea804c59ee27420d04fd4d680c35225173ee1dc
+              {loading ? 'Finding projects...' : `${filteredRepos.length} matches found`}
             </h3>
             
             {/* Show a reminder if using default mock account */}
@@ -157,28 +147,17 @@ export default function Home() {
               <h4 className="text-[#24292f] font-bold mb-1">Server Connection Offline</h4>
               <p className="text-xs text-[#57606a] max-w-sm">{error}</p>
             </div>
-<<<<<<< HEAD
           ) : filteredRepos.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center py-20 border border-slate-900 rounded-2xl bg-slate-900/10 text-center">
-              <svg className="w-12 h-12 text-slate-600 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-=======
-          ) : repos.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center py-20 rounded-md border border-[#d0d7de] bg-white text-center">
               <svg className="w-12 h-12 text-[#6e7781] mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
->>>>>>> 1ea804c59ee27420d04fd4d680c35225173ee1dc
                 <path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" />
               </svg>
               <h4 className="text-[#24292f] font-bold mb-1">No matches found</h4>
               <p className="text-xs text-[#57606a] max-w-xs">Try broadening your search query or loosening your filter criteria.</p>
             </div>
           ) : (
-<<<<<<< HEAD
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {filteredRepos.map((repo, idx) => (
-=======
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-              {repos.map((repo, idx) => (
->>>>>>> 1ea804c59ee27420d04fd4d680c35225173ee1dc
+              {filteredRepos.map((repo, idx) => (
                 <RepoCard
                   key={`${repo.owner}-${repo.name}-${idx}`}
                   repo={repo}
