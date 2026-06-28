@@ -300,14 +300,17 @@ class GitHubService:
             async with httpx.AsyncClient(limits=limits) as client:
                 items = await self._fetch_search_candidates(client, base_q_parts, domain, experience_level)
 
-                # Process top candidates concurrently to improve response time significantly
+                # Process top candidates concurrently with controlled concurrency to prevent memory spikes on small instances
                 import asyncio
-                limit = 400 if (not domain or domain == "All Domains") else 130
+                limit = 240 if (not domain or domain == "All Domains") else 110
                 unique_items = items[:limit]
-                tasks = [
-                    self._process_repository_item(client, item, user_preferred_languages or [])
-                    for item in unique_items
-                ]
+                
+                sem = asyncio.Semaphore(15)
+                async def sem_process(item):
+                    async with sem:
+                        return await self._process_repository_item(client, item, user_preferred_languages or [])
+
+                tasks = [sem_process(item) for item in unique_items]
                 processed_items = await asyncio.gather(*tasks, return_exceptions=True)
 
                 for repo_data in processed_items:
