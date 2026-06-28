@@ -1,0 +1,366 @@
+{
+  "Blockchain": [
+    {
+      "name": "union",
+      "owner": "unionlabs",
+      "stars": 73935,
+      "forks": 3888,
+      "language": "Rust",
+      "url": "https://github.com/unionlabs/union",
+      "description": "The trust-minimized, zero-knowledge bridging protocol, designed for censorship resistance, extremely high security, and usage in decentralized finance."
+    },
+    {
+      "name": "go-ethereum",
+      "owner": "ethereum",
+      "stars": 51215,
+      "forks": 21921,
+      "language": "Go",
+      "url": "https://github.com/ethereum/go-ethereum",
+      "description": "Go implementation of the Ethereum protocol"
+    },
+    {
+      "name": "ccxt",
+      "owner": "ccxt",
+      "stars": 43100,
+      "forks": 8721,
+      "language": "Python",
+      "url": "https://github.com/ccxt/ccxt",
+      "description": "A cryptocurrency trading API with more than 100 exchanges in JavaScript / TypeScript / Python / C# / PHP / Go / Java "
+    },
+    {
+      "name": "shardeum",
+      "owner": "shardeum",
+      "stars": 31374,
+      "forks": 704,
+      "language": "TypeScript",
+      "url": "https://github.com/shardeum/shardeum",
+      "description": "Shardeum is an EVM based autoscaling blockchain"
+    },
+    {
+      "name": "hey-1",
+      "owner": "slymnoyann",
+      "stars": 29387,
+      "forks": 1807,
+      "language": "TypeScript",
+      "url": "https://github.com/slymnoyann/hey-1",
+      "description": "Hey is a decentralized and permissionless social media app built with Lens Protocol \ud83c\udf3f"
+    },
+    {
+      "name": "openzeppelin-contracts",
+      "owner": "OpenZeppelin",
+      "stars": 27171,
+      "forks": 12392,
+      "language": "Solidity",
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "description": "OpenZeppelin Contracts is a library for secure smart contract development."
+    },
+    {
+      "name": "solidity",
+      "owner": "argotorg",
+      "stars": 25669,
+      "forks": 6133,
+      "language": "C++",
+      "url": "https://github.com/argotorg/solidity",
+      "description": "Solidity, the Smart Contract Programming Language"
+    },
+    {
+      "name": "bitcoinbook",
+      "owner": "bitcoinbook",
+      "stars": 25225,
+      "forks": 6187,
+      "language": "HTML",
+      "url": "https://github.com/bitcoinbook/bitcoinbook",
+      "description": "Mastering Bitcoin 3rd Edition - Programming the Open Blockchain"
+    },
+    {
+      "name": "fhevm",
+      "owner": "zama-ai",
+      "stars": 25195,
+      "forks": 2027,
+      "language": "Rust",
+      "url": "https://github.com/zama-ai/fhevm",
+      "description": "FHEVM, a full-stack framework for integrating Fully Homomorphic Encryption (FHE) with blockchain applications"
+    },
+    {
+      "name": "ethereumbook",
+      "owner": "ethereumbook",
+      "stars": 21526,
+      "forks": 5184,
+      "language": null,
+      "url": "https://github.com/ethereumbook/ethereumbook",
+      "description": "Mastering Ethereum: 2nd Edition, by Andreas M. Antonopoulos, Gavin Wood, Carlo Parisi, Alessandro Mazza, Niccol\u00f2 Pozzolini"
+    },
+    {
+      "name": "web3.js",
+      "owner": "web3",
+      "stars": 19935,
+      "forks": 5114,
+      "language": "TypeScript",
+      "url": "https://github.com/web3/web3.js",
+      "description": "Collection of comprehensive TypeScript libraries for Interaction with the Ethereum JSON RPC API and utility functions."
+    },
+    {
+      "name": "gun",
+      "owner": "amark",
+      "stars": 19062,
+      "forks": 1238,
+      "language": "JavaScript",
+      "url": "https://github.com/amark/gun",
+      "description": "An open source cybersecurity protocol for syncing decentralized graph data."
+    },
+    {
+      "name": "hummingbot",
+      "owner": "hummingbot",
+      "stars": 19008,
+      "forks": 4760,
+      "language": "Python",
+      "url": "https://github.com/hummingbot/hummingbot",
+      "description": "Open source software that helps you create and deploy high-frequency crypto trading bots"
+    },
+    {
+      "name": "awesome-blockchain-cn",
+      "owner": "chaozh",
+      "stars": 18958,
+      "forks": 3629,
+      "language": "JavaScript",
+      "url": "https://github.com/chaozh/awesome-blockchain-cn",
+      "description": "\u6536\u96c6\u6240\u6709\u533a\u5757\u94fe(BlockChain)\u6280\u672f\u5f00\u53d1\u76f8\u5173\u8d44\u6599\uff0c\u5305\u62ecFabric\u548cEthereum\u5f00\u53d1\u8d44\u6599"
+    },
+    {
+      "name": "subql",
+      "owner": "subquery",
+      "stars": 18787,
+      "forks": 396,
+      "language": "TypeScript",
+      "url": "https://github.com/subquery/subql",
+      "description": "SubQuery is an Open, Flexible, Fast and Universal data indexing framework for web3. Our mission is to help developers create the decentralised products of the future."
+    },
+    {
+      "name": "sismo-badges",
+      "owner": "sismo-core",
+      "stars": 15904,
+      "forks": 529,
+      "language": "TypeScript",
+      "url": "https://github.com/sismo-core/sismo-badges",
+      "description": "Contracts of the Sismo Badge Minting Protocol "
+    },
+    {
+      "name": "solana",
+      "owner": "solana-labs",
+      "stars": 14922,
+      "forks": 5728,
+      "language": "Rust",
+      "url": "https://github.com/solana-labs/solana",
+      "description": "Web-Scale Blockchain for fast, secure, scalable, decentralized apps and marketplaces."
+    },
+    {
+      "name": "full-blockchain-solidity-course-js",
+      "owner": "smartcontractkit",
+      "stars": 14019,
+      "forks": 3279,
+      "language": null,
+      "url": "https://github.com/smartcontractkit/full-blockchain-solidity-course-js",
+      "description": "Learn Blockchain, Solidity, and Full Stack Web3 Development with Javascript"
+    },
+    {
+      "name": "WTF-Solidity",
+      "owner": "AmazingAng",
+      "stars": 14005,
+      "forks": 2420,
+      "language": "Solidity",
+      "url": "https://github.com/AmazingAng/WTF-Solidity",
+      "description": "WTF Solidity \u6781\u7b80\u5165\u95e8\u6559\u7a0b\uff0c\u4f9b\u5c0f\u767d\u4eec\u4f7f\u7528\u3002Now supports English! \u5b98\u7f51: https://wtf.academy"
+    },
+    {
+      "name": "truffle",
+      "owner": "ConsenSys-archive",
+      "stars": 13928,
+      "forks": 2296,
+      "language": "TypeScript",
+      "url": "https://github.com/ConsenSys-archive/truffle",
+      "description": ":warning: The Truffle Suite is being sunset. For information on ongoing support, migration options and FAQs, visit the Consensys blog. Thank you for all the support over the years."
+    }
+  ],
+  "Cybersecurity": [
+    {
+      "name": "bitcoin",
+      "owner": "bitcoin",
+      "stars": 89565,
+      "forks": 39032,
+      "language": "C++",
+      "url": "https://github.com/bitcoin/bitcoin",
+      "description": "Bitcoin Core integration/staging tree"
+    },
+    {
+      "name": "sherlock",
+      "owner": "sherlock-project",
+      "stars": 85713,
+      "forks": 10021,
+      "language": "Python",
+      "url": "https://github.com/sherlock-project/sherlock",
+      "description": "Hunt down social media accounts by username across social networks"
+    },
+    {
+      "name": "PayloadsAllTheThings",
+      "owner": "swisskyrepo",
+      "stars": 78740,
+      "forks": 17133,
+      "language": "Python",
+      "url": "https://github.com/swisskyrepo/PayloadsAllTheThings",
+      "description": "A list of useful payloads and bypass for Web Application Security and Pentest/CTF"
+    },
+    {
+      "name": "shannon",
+      "owner": "KeygraphHQ",
+      "stars": 45196,
+      "forks": 5239,
+      "language": "TypeScript",
+      "url": "https://github.com/KeygraphHQ/shannon",
+      "description": "Shannon is an autonomous, white-box AI pentester for web applications and APIs. It analyzes your source code, identifies attack vectors, and executes real exploits to prove vulnerabilities before they reach production."
+    },
+    {
+      "name": "sqlmap",
+      "owner": "sqlmapproject",
+      "stars": 37763,
+      "forks": 6304,
+      "language": "Python",
+      "url": "https://github.com/sqlmapproject/sqlmap",
+      "description": "Automatic SQL injection and database takeover tool"
+    },
+    {
+      "name": "trivy",
+      "owner": "aquasecurity",
+      "stars": 36631,
+      "forks": 500,
+      "language": "Go",
+      "url": "https://github.com/aquasecurity/trivy",
+      "description": "Find vulnerabilities, misconfigurations, secrets, SBOM in containers, Kubernetes, code repositories, clouds and more"
+    },
+    {
+      "name": "JavaScript",
+      "owner": "TheAlgorithms",
+      "stars": 34189,
+      "forks": 5853,
+      "language": "JavaScript",
+      "url": "https://github.com/TheAlgorithms/JavaScript",
+      "description": "Algorithms and Data Structures implemented in JavaScript for beginners, following best practices."
+    },
+    {
+      "name": "maigret",
+      "owner": "soxoj",
+      "stars": 33867,
+      "forks": 2550,
+      "language": "Python",
+      "url": "https://github.com/soxoj/maigret",
+      "description": "\ud83d\udd75\ufe0f\u200d\u2642\ufe0f Collect a dossier on a person by username from 3000+ sites"
+    },
+    {
+      "name": "anoma",
+      "owner": "anoma",
+      "stars": 33760,
+      "forks": 4115,
+      "language": "Elixir",
+      "url": "https://github.com/anoma/anoma",
+      "description": "Reference implementation of Anoma"
+    },
+    {
+      "name": "openssl",
+      "owner": "openssl",
+      "stars": 30377,
+      "forks": 11341,
+      "language": "C",
+      "url": "https://github.com/openssl/openssl",
+      "description": "General purpose TLS and crypto library"
+    },
+    {
+      "name": "nuclei",
+      "owner": "projectdiscovery",
+      "stars": 29380,
+      "forks": 3515,
+      "language": "Go",
+      "url": "https://github.com/projectdiscovery/nuclei",
+      "description": "Nuclei is a fast, customizable vulnerability scanner powered by the global security community and built on a simple YAML-based DSL, enabling collaboration to tackle trending vulnerabilities on the internet. It helps you find vulnerabilities in your applications, APIs, networks, DNS, and cloud configurations."
+    },
+    {
+      "name": "h4cker",
+      "owner": "The-Art-of-Hacking",
+      "stars": 27985,
+      "forks": 5224,
+      "language": "Jupyter Notebook",
+      "url": "https://github.com/The-Art-of-Hacking/h4cker",
+      "description": "This repository is maintained by Omar Santos (@santosomar) and includes thousands of resources related to ethical hacking, bug bounties, digital forensics and incident response (DFIR), AI security, vulnerability research, exploit development, reverse engineering, and more. \ud83d\udd25 Also check: https://hackertraining.org"
+    },
+    {
+      "name": "strix",
+      "owner": "usestrix",
+      "stars": 26329,
+      "forks": 2964,
+      "language": "Python",
+      "url": "https://github.com/usestrix/strix",
+      "description": "Open-source AI hackers to find and fix your app\u2019s vulnerabilities."
+    },
+    {
+      "name": "social-analyzer",
+      "owner": "qeeqbox",
+      "stars": 23217,
+      "forks": 2213,
+      "language": "JavaScript",
+      "url": "https://github.com/qeeqbox/social-analyzer",
+      "description": "API, CLI, and Web App for analyzing and finding a person's profile in 1000 social media \\ websites"
+    },
+    {
+      "name": "promptfoo",
+      "owner": "promptfoo",
+      "stars": 22666,
+      "forks": 2017,
+      "language": "TypeScript",
+      "url": "https://github.com/promptfoo/promptfoo",
+      "description": "Test your prompts, agents, and RAGs. Red teaming/pentesting/vulnerability scanning for AI. Compare performance of GPT, Claude, Gemini, DeepSeek, and more. Simple declarative configs with command line and CI/CD integration.  Used by OpenAI and Anthropic."
+    },
+    {
+      "name": "Anthropic-Cybersecurity-Skills",
+      "owner": "mukul975",
+      "stars": 22362,
+      "forks": 2557,
+      "language": "Python",
+      "url": "https://github.com/mukul975/Anthropic-Cybersecurity-Skills",
+      "description": "817 structured cybersecurity skills for AI agents \u00b7 Mapped to 6 frameworks: MITRE ATT&CK, NIST CSF 2.0, MITRE ATLAS, D3FEND, NIST AI RMF & MITRE F3 (Fight Fraud) \u00b7 agentskills.io standard \u00b7 Works with Claude Code, GitHub Copilot, Codex CLI, Cursor, Gemini CLI & 20+ platforms \u00b7 29 security domains \u00b7 Apache 2.0"
+    },
+    {
+      "name": "Ciphey",
+      "owner": "bee-san",
+      "stars": 21463,
+      "forks": 1436,
+      "language": "Rust",
+      "url": "https://github.com/bee-san/Ciphey",
+      "description": "\u26a1 Automatically decrypt encryptions without knowing the key or cipher, decode encodings, and crack hashes \u26a1"
+    },
+    {
+      "name": "vulhub",
+      "owner": "vulhub",
+      "stars": 20895,
+      "forks": 4783,
+      "language": "Dockerfile",
+      "url": "https://github.com/vulhub/vulhub",
+      "description": "Pre-Built Vulnerable Environments Based on Docker-Compose"
+    },
+    {
+      "name": "RustScan",
+      "owner": "bee-san",
+      "stars": 20008,
+      "forks": 1345,
+      "language": "Rust",
+      "url": "https://github.com/bee-san/RustScan",
+      "description": "\ud83e\udd16 The Modern Port Scanner \ud83e\udd16"
+    },
+    {
+      "name": "SWE-agent",
+      "owner": "SWE-agent",
+      "stars": 19648,
+      "forks": 2146,
+      "language": "Python",
+      "url": "https://github.com/SWE-agent/SWE-agent",
+      "description": "SWE-agent takes a GitHub issue and tries to automatically fix it, using your LM of choice. It can also be employed for offensive cybersecurity or competitive coding challenges. [NeurIPS 2024] "
+    }
+  ]
+}

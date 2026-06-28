@@ -29,6 +29,7 @@ export default function Home() {
   const [userId, setUserId] = useState<string | null>(null);
   const [savedRepoIds, setSavedRepoIds] = useState<Set<string>>(new Set());
   const requestIdRef = useRef(0);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Initialize user_id from localStorage
   useEffect(() => {
@@ -86,6 +87,11 @@ export default function Home() {
     fetchRepos(query, domain, language, userId);
   }, [query, domain, language, userId, fetchRepos]);
 
+  // Reset page when filters or search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query, domain, level, language]);
+
   const filteredRepos = repos.filter((repo) => {
     return (
       matchesFilter(domain, 'All Domains', repo.domain) &&
@@ -93,6 +99,11 @@ export default function Home() {
       matchesFilter(language, 'All Languages', repo.language)
     );
   });
+
+  const PAGE_SIZE = 20;
+  const totalPages = Math.ceil(filteredRepos.length / PAGE_SIZE);
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const paginatedRepos = filteredRepos.slice(startIndex, startIndex + PAGE_SIZE);
 
   const handleSaveRepo = async (repo: RepoResult) => {
     const targetUserId = userId || GUEST_USER_ID;
@@ -179,16 +190,47 @@ export default function Home() {
               <p className="text-xs text-[#57606a] max-w-xs">Try broadening your search query or loosening your filter criteria.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-              {filteredRepos.map((repo, idx) => (
-                <RepoCard
-                  key={`${repo.owner}-${repo.name}-${idx}`}
-                  repo={repo}
-                  isSaved={savedRepoIds.has(`${repo.owner}/${repo.name}`.toLowerCase())}
-                  onSave={handleSaveRepo}
-                />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+                {paginatedRepos.map((repo, idx) => (
+                  <RepoCard
+                    key={`${repo.owner}-${repo.name}-${idx}`}
+                    repo={repo}
+                    isSaved={savedRepoIds.has(`${repo.owner}/${repo.name}`.toLowerCase())}
+                    onSave={handleSaveRepo}
+                  />
+                ))}
+              </div>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="mt-8 flex items-center justify-center gap-4 border-t border-[#d8dee4] pt-6">
+                  <button
+                    onClick={() => {
+                      setCurrentPage((p) => Math.max(1, p - 1));
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    disabled={currentPage === 1}
+                    className="rounded-md border border-[#d0d7de] bg-white px-4 py-2 text-sm font-semibold text-[#24292f] hover:bg-[#f6f8fa] disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                  >
+                    Previous
+                  </button>
+                  <span className="text-sm text-[#57606a]">
+                    Page <span className="font-semibold text-[#24292f]">{currentPage}</span> of <span className="font-semibold text-[#24292f]">{totalPages}</span>
+                  </span>
+                  <button
+                    onClick={() => {
+                      setCurrentPage((p) => Math.min(totalPages, p + 1));
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    disabled={currentPage === totalPages}
+                    className="rounded-md border border-[#d0d7de] bg-white px-4 py-2 text-sm font-semibold text-[#24292f] hover:bg-[#f6f8fa] disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
