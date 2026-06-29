@@ -5,11 +5,11 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://gitniche.com"),
-  title: "GitNiche | Discover Open Source Opportunities",
-  description: "AI-powered platform to find active, beginner-friendly open-source contribution opportunities customized for your developer stack.",
+  title: "GitNiche | Find Open Source Projects for Your Skills",
+  description: "GitNiche helps developers find beginner-friendly open-source repositories by language, domain, and difficulty.",
   openGraph: {
-    title: "GitNiche | Discover Open Source Opportunities",
-    description: "AI-powered platform to find active, beginner-friendly open-source contribution opportunities customized for your developer stack.",
+    title: "GitNiche - Open Source Project Discovery",
+    description: "Find GitHub repositories that match your tech stack and contribution level.",
     url: "https://gitniche.com",
     siteName: "GitNiche",
     images: [
@@ -25,8 +25,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "GitNiche | Discover Open Source Opportunities",
-    description: "AI-powered platform to find active, beginner-friendly open-source contribution opportunities customized for your developer stack.",
+    title: "GitNiche - Open Source Project Discovery",
+    description: "Find GitHub repositories that match your tech stack and contribution level.",
     images: ["/og-image.png"],
   },
 };
@@ -59,6 +59,14 @@ export default function RootLayout({
               {' '}|{' '}
               <Link href="/privacy" className="font-medium text-[#0969da] hover:underline">
                 Privacy Policy
+              </Link>
+              {' '}|{' '}
+              <Link href="/terms" className="font-medium text-[#0969da] hover:underline">
+                Terms of Service
+              </Link>
+              {' '}|{' '}
+              <Link href="/contact" className="font-medium text-[#0969da] hover:underline">
+                Contact
               </Link>
             </p>
           </div>

@@ -150,12 +150,12 @@ export default function RepoCard({
           <a href={repo.codespaces_url} target="_blank" rel="noopener noreferrer" className="rounded-md border border-border-color bg-bg-btn px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-[#f3f4f6] dark:hover:bg-[#30363d] cursor-pointer">Codespaces</a>
           <a href={repo.gitpod_url} target="_blank" rel="noopener noreferrer" className="rounded-md border border-border-color bg-bg-btn px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-[#f3f4f6] dark:hover:bg-[#30363d] cursor-pointer">Gitpod</a>
           {onSave && !isSaved && (
-            <button onClick={handleSave} disabled={loading} className="ml-auto rounded-md border border-border-color bg-bg-card px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-btn cursor-pointer">
+            <button onClick={handleSave} disabled={loading} aria-label={`Save ${repo.owner}/${repo.name} repository to your list`} className="ml-auto rounded-md border border-border-color bg-bg-card px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-btn cursor-pointer">
               {loading ? 'Saving...' : 'Save'}
             </button>
           )}
           {onUnsave && (
-            <button onClick={handleUnsave} disabled={loading} className="ml-auto rounded-md border border-[#ff8182] bg-[#ffebe9] px-3 py-1.5 text-xs font-semibold text-[#cf222e] hover:bg-[#ffd6d3] dark:border-[#f85149]/40 dark:bg-[#f85149]/10 dark:text-[#ff7b72] dark:hover:bg-[#f85149]/20 disabled:opacity-60 cursor-pointer">
+            <button onClick={handleUnsave} disabled={loading} aria-label={`Unsave ${repo.owner}/${repo.name} repository from your list`} className="ml-auto rounded-md border border-[#ff8182] bg-[#ffebe9] px-3 py-1.5 text-xs font-semibold text-[#cf222e] hover:bg-[#ffd6d3] dark:border-[#f85149]/40 dark:bg-[#f85149]/10 dark:text-[#ff7b72] dark:hover:bg-[#f85149]/20 disabled:opacity-60 cursor-pointer">
               {loading ? 'Removing...' : 'Unsave'}
             </button>
           )}

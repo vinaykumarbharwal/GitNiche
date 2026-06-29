@@ -219,7 +219,7 @@ export default function Home() {
               <div className="flex flex-col gap-1 rounded-md border border-border-color bg-bg-card px-4 py-3 text-sm text-text-secondary transition duration-200">
                 <div className="flex items-center gap-2">
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-border-color border-t-[#0969da] dark:border-t-[#58a6ff]" />
-                  <p className="font-semibold text-text-primary">Finding projects...</p>
+                  <p role="status" aria-live="polite" className="font-semibold text-text-primary">Finding projects...</p>
                 </div>
                 {isWakingUp && (
                   <p className="text-xs text-text-secondary mt-1 pl-6">

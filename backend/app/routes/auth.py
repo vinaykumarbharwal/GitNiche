@@ -1,7 +1,7 @@
 from urllib.parse import urlencode
-
+import secrets
 import httpx
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Query, status, Request
 from fastapi.responses import RedirectResponse
 
 from app.config import settings
@@ -16,21 +16,39 @@ async def github_login():
         message = "GitHub OAuth is not configured. Set GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET in backend/.env."
         return RedirectResponse(f"{settings.FRONTEND_URL}/auth/callback?{urlencode({'error': message})}")
 
+    state = secrets.token_urlsafe(16)
     params = urlencode({
         "client_id": settings.GITHUB_CLIENT_ID,
         "redirect_uri": settings.GITHUB_OAUTH_REDIRECT_URI,
         "scope": "read:user user:email",
         "allow_signup": "true",
+        "state": state
     })
-    return RedirectResponse(f"https://github.com/login/oauth/authorize?{params}")
+    response = RedirectResponse(f"https://github.com/login/oauth/authorize?{params}")
+    response.set_cookie(
+        key="github_oauth_state",
+        value=state,
+        httponly=True,
+        secure=not settings.DEBUG,
+        samesite="lax",
+        max_age=600  # 10 minutes
+    )
+    return response
 
 
 @router.get("/auth/github/callback")
 async def github_callback(
+    request: Request,
     code: str | None = Query(default=None),
+    state: str | None = Query(default=None),
     error: str | None = Query(default=None),
     error_description: str | None = Query(default=None),
 ):
+    cookie_state = request.cookies.get("github_oauth_state")
+    if not cookie_state or cookie_state != state:
+        return RedirectResponse(
+            f"{settings.FRONTEND_URL}/auth/callback?{urlencode({'error': 'CSRF state verification failed.'})}"
+        )
     if error:
         message = error_description or error
         return RedirectResponse(f"{settings.FRONTEND_URL}/auth/callback?{urlencode({'error': message})}")

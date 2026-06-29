@@ -42,26 +42,26 @@ export default function Filters({
       </div>
 
       <div className="flex flex-col gap-4">
-        <label className="flex flex-col gap-1.5">
-          <span className="text-xs font-semibold text-text-secondary">Domain</span>
-          <select value={selectedDomain} onChange={(e) => onChangeDomain(e.target.value)} className={selectClass}>
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="domain-filter" className="text-xs font-semibold text-text-secondary">Domain</label>
+          <select id="domain-filter" value={selectedDomain} onChange={(e) => onChangeDomain(e.target.value)} className={selectClass}>
             {domains.map((dom) => <option key={dom} value={dom} className="bg-bg-card text-text-primary">{dom}</option>)}
           </select>
-        </label>
+        </div>
 
-        <label className="flex flex-col gap-1.5">
-          <span className="text-xs font-semibold text-text-secondary">Difficulty</span>
-          <select value={selectedLevel} onChange={(e) => onChangeLevel(e.target.value)} className={selectClass}>
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="difficulty-filter" className="text-xs font-semibold text-text-secondary">Difficulty</label>
+          <select id="difficulty-filter" value={selectedLevel} onChange={(e) => onChangeLevel(e.target.value)} className={selectClass}>
             {levels.map((level) => <option key={level} value={level} className="bg-bg-card text-text-primary">{level}</option>)}
           </select>
-        </label>
+        </div>
 
-        <label className="flex flex-col gap-1.5">
-          <span className="text-xs font-semibold text-text-secondary">Language</span>
-          <select value={selectedLanguage} onChange={(e) => onChangeLanguage(e.target.value)} className={selectClass}>
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="language-filter" className="text-xs font-semibold text-text-secondary">Language</label>
+          <select id="language-filter" value={selectedLanguage} onChange={(e) => onChangeLanguage(e.target.value)} className={selectClass}>
             {languages.map((lang) => <option key={lang} value={lang} className="bg-bg-card text-text-primary">{lang}</option>)}
           </select>
-        </label>
+        </div>
       </div>
     </aside>
   );

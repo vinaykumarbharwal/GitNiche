@@ -297,7 +297,7 @@ class GitHubService:
         results = []
         try:
             limits = httpx.Limits(max_connections=500, max_keepalive_connections=100)
-            async with httpx.AsyncClient(limits=limits) as client:
+            async with httpx.AsyncClient(limits=limits, timeout=10.0) as client:
                 items = await self._fetch_search_candidates(client, base_q_parts, domain, experience_level)
 
                 # Process top candidates concurrently with controlled concurrency to prevent memory spikes on small instances

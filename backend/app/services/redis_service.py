@@ -21,8 +21,14 @@ class RedisService:
             logger.warning("Upstash Redis URL or Token not configured. Using local in-memory cache fallback.")
 
     async def get(self, key: str) -> Optional[str]:
+        import time
         if not self.enabled:
-            # Simple check for local cache
+            # Simple check for local cache with TTL expiration
+            expire_at = self._local_cache_expiry.get(key)
+            if expire_at and time.time() > expire_at:
+                self._local_cache.pop(key, None)
+                self._local_cache_expiry.pop(key, None)
+                return None
             return self._local_cache.get(key)
             
         try:
@@ -43,11 +49,18 @@ class RedisService:
             self.enabled = False
         
         # Try local fallback on remote error
+        expire_at = self._local_cache_expiry.get(key)
+        if expire_at and time.time() > expire_at:
+            self._local_cache.pop(key, None)
+            self._local_cache_expiry.pop(key, None)
+            return None
         return self._local_cache.get(key)
 
     async def set(self, key: str, value: str, expire_seconds: int = 3600) -> bool:
+        import time
         # Always update local cache just in case
         self._local_cache[key] = value
+        self._local_cache_expiry[key] = time.time() + expire_seconds
 
         if not self.enabled:
             return True
