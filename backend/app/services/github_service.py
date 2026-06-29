@@ -302,7 +302,7 @@ class GitHubService:
 
                 # Process top candidates concurrently with controlled concurrency to prevent memory spikes on small instances
                 import asyncio
-                limit = 240 if (not domain or domain == "All Domains") else 110
+                limit = 60 if (not domain or domain == "All Domains") else 30
                 unique_items = items[:limit]
                 
                 sem = asyncio.Semaphore(15)

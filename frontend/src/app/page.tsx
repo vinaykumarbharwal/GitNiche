@@ -24,7 +24,7 @@ export default function Home() {
   const [language, setLanguage] = useState('All Languages');
   
   const [repos, setRepos] = useState<RepoResult[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [userId, setUserId] = useState<string | null>(null);
@@ -188,8 +188,11 @@ export default function Home() {
               <svg className="w-12 h-12 text-text-secondary mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" />
               </svg>
-              <h4 className="text-text-primary font-bold mb-1">No matches found</h4>
-              <p className="text-xs text-text-secondary max-w-xs">Try broadening your search query or loosening your filter criteria.</p>
+              <h4 className="text-text-primary font-bold mb-1">No matching opportunities found</h4>
+              <p className="text-xs text-text-secondary max-w-sm px-4">
+                Try broadening your query, adjusting the filter settings, or searching for other topics. 
+                Keep in mind that repository indexes are automatically refreshed on a schedule, and new opportunities are added periodically.
+              </p>
             </div>
           ) : (
             <>

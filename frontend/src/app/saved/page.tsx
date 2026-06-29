@@ -15,13 +15,21 @@ export default function SavedRepos() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [username, setUsername] = useState<string | null>(null);
-  const [savedUserId, setSavedUserId] = useState<string>(GUEST_USER_ID);
+  const [savedUserId, setSavedUserId] = useState<string>('');
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
     const session = authStorage.getSession();
-    const resolvedUserId = session?.user_id || GUEST_USER_ID;
+    if (!session) {
+      setIsAuthenticated(false);
+      window.location.href = apiService.getGitHubLoginUrl();
+      return;
+    }
+
+    setIsAuthenticated(true);
+    const resolvedUserId = session.user_id;
     setSavedUserId(resolvedUserId);
-    setUsername(session?.username || 'Guest');
+    setUsername(session.username);
 
     const fetchSaved = async () => {
       setLoading(true);
@@ -62,6 +70,13 @@ export default function SavedRepos() {
     codespaces_url: `https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=${saved.repo_owner}/${saved.repo_name}`,
     gitpod_url: `https://gitpod.io/#${saved.repo_url}`,
   });
+  if (isAuthenticated === null || isAuthenticated === false) {
+    return (
+      <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center px-4 py-20 text-center">
+        <div className="text-sm text-text-secondary">Redirecting to GitHub sign-in...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">

@@ -17,6 +17,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const [session, setSession] = useState<AuthSession | null>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
     setSession(authStorage.getSession());
@@ -90,20 +91,51 @@ export default function Navbar() {
               )}
             </button>
             {session ? (
-              <>
-                <div className="flex min-w-0 items-center gap-2 rounded-md border border-[#57606a] bg-[#1f2328] px-2 py-1">
+              <div className="relative">
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center gap-2 rounded-full border border-[#57606a] bg-[#1f2328] p-1 text-[#f0f6fc] hover:bg-[#30363d] focus:outline-none transition cursor-pointer"
+                  aria-label="User menu"
+                >
                   <div
-                    className="flex h-6 w-6 items-center justify-center rounded-full bg-[#6e7781] bg-cover bg-center text-xs font-semibold"
+                    className="flex h-7 w-7 items-center justify-center rounded-full bg-[#6e7781] bg-cover bg-center text-xs font-semibold"
                     style={session.avatar_url ? { backgroundImage: `url(${session.avatar_url})` } : undefined}
                     aria-hidden="true"
                   >
                     {!session.avatar_url && session.username[0]?.toUpperCase()}
                   </div>
-                </div>
-                <button onClick={signOut} className="rounded-md border border-[#57606a] bg-transparent px-3 py-1.5 text-sm font-medium text-[#f0f6fc] hover:bg-[#30363d]">
-                  Sign out
+                  <svg className="h-4 w-4 text-[#8c959f]" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M12.78 6.22a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L3.22 7.28a.75.75 0 0 1 1.06-1.06L8 9.94l3.72-3.72a.75.75 0 0 1 1.06 0Z" />
+                  </svg>
                 </button>
-              </>
+
+                {isDropdownOpen && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setIsDropdownOpen(false)} />
+                    <div className="absolute right-0 mt-2 w-48 z-20 origin-top-right rounded-md border border-[#30363d] bg-[#1f2328] py-1 shadow-lg ring-1 ring-black/5 focus:outline-none text-left">
+                      <div className="px-4 py-2 border-b border-[#30363d] text-xs text-[#8c959f]">
+                        Signed in as <span className="font-semibold text-white block truncate">{session.username}</span>
+                      </div>
+                      <Link
+                        href="/profile"
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="block px-4 py-2 text-sm text-[#f0f6fc] hover:bg-[#316dca] hover:text-white"
+                      >
+                        Developer Settings
+                      </Link>
+                      <button
+                        onClick={() => {
+                          setIsDropdownOpen(false);
+                          signOut();
+                        }}
+                        className="block w-full text-left px-4 py-2 text-sm text-[#ff7b72] hover:bg-[#cf222e] hover:text-white border-t border-[#30363d] cursor-pointer"
+                      >
+                        Sign out
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
             ) : (
               <a href={apiService.getGitHubLoginUrl()} className="inline-flex items-center gap-2 rounded-md bg-[#2da44e] px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-[#2c974b]">
                 <GitHubMark className="h-4 w-4" />

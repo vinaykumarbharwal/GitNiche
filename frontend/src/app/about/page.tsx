@@ -48,19 +48,6 @@ export default function AboutPage() {
             View Saved Repos
           </Link>
         </div>
-
-        <p className="mt-8 text-sm font-medium text-[#57606a]">
-          Built by Vinay Kumar |
-          {' '}
-          <a
-            href="https://github.com/vinaykumarbharwal"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[#0969da] hover:underline"
-          >
-            GitHub
-          </a>
-        </p>
       </div>
     </div>
   );
