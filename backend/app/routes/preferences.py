@@ -46,3 +46,13 @@ async def get_user_preferences(user_id: str):
             detail=f"Preferences for user {user_id} not found."
         )
     return pref
+
+@router.delete("/preferences/delete-account/{user_id}")
+async def delete_user_account(user_id: str):
+    success = await supabase_service.delete_user_data(user_id)
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to delete user data."
+        )
+    return {"message": "All user data and account deleted successfully."}

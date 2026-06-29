@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://gitniche.com"),
@@ -55,6 +56,10 @@ export default function RootLayout({
               >
                 GitHub
               </a>
+              {' '}|{' '}
+              <Link href="/privacy" className="font-medium text-[#0969da] hover:underline">
+                Privacy Policy
+              </Link>
             </p>
           </div>
         </footer>

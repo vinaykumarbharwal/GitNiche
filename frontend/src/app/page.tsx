@@ -26,6 +26,7 @@ export default function Home() {
   const [repos, setRepos] = useState<RepoResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isWakingUp, setIsWakingUp] = useState(false);
 
   const [userId, setUserId] = useState<string | null>(null);
   const [savedRepoIds, setSavedRepoIds] = useState<Set<string>>(new Set());
@@ -62,23 +63,47 @@ export default function Home() {
     requestIdRef.current = requestId;
     setLoading(true);
     setError(null);
+    setIsWakingUp(false);
+
+    // Setup waking up timer (7 seconds)
+    const wakeUpTimer = setTimeout(() => {
+      if (requestIdRef.current === requestId) {
+        setIsWakingUp(true);
+      }
+    }, 7000);
+
     try {
-      const results = await apiService.searchRepositories({
-        query: searchQuery,
-        domain: selectedDomain,
-        experience_level: undefined,
-        language: selectedLang,
-        user_id: currUserId || undefined
-      });
+      // 15 seconds request timeout
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("TIMEOUT")), 15000)
+      );
+
+      const results = await Promise.race([
+        apiService.searchRepositories({
+          query: searchQuery,
+          domain: selectedDomain,
+          experience_level: undefined,
+          language: selectedLang,
+          user_id: currUserId || undefined
+        }),
+        timeoutPromise
+      ]);
+
       if (requestId !== requestIdRef.current) return;
       setRepos(results);
     } catch (err: unknown) {
       if (requestId !== requestIdRef.current) return;
       console.error(err);
-      setError(getErrorMessage(err, 'Failed to load opportunities. Ensure the backend server is running.')); 
+      if (err instanceof Error && err.message === "TIMEOUT") {
+        setError('Could not load projects. The backend server might be starting up or is offline. Please click Retry.');
+      } else {
+        setError(getErrorMessage(err, 'Failed to load opportunities. Ensure the backend server is running.')); 
+      }
     } finally {
+      clearTimeout(wakeUpTimer);
       if (requestId === requestIdRef.current) {
         setLoading(false);
+        setIsWakingUp(false);
       }
     }
   }, []);
@@ -170,10 +195,18 @@ export default function Home() {
 
           {/* Loader, Error, or Results Grid */}
           {loading ? (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, idx) => (
-                <RepoCardSkeleton key={idx} />
-              ))}
+            <div className="flex flex-col gap-4">
+              {isWakingUp && (
+                <div className="flex items-center gap-2 rounded-md border border-border-color bg-bg-card px-4 py-3 text-sm text-text-secondary transition duration-200">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-border-color border-t-[#0969da] dark:border-t-[#58a6ff]" />
+                  <span>Backend is waking up (Render cold starts can take up to 40 seconds)...</span>
+                </div>
+              )}
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, idx) => (
+                  <RepoCardSkeleton key={idx} />
+                ))}
+              </div>
             </div>
           ) : error ? (
             <div className="flex-1 flex flex-col items-center justify-center py-16 px-4 rounded-md border border-[#ff8182] bg-[#ffebe9] dark:border-[#f85149]/40 dark:bg-[#f85149]/10 text-center transition duration-200">
@@ -181,7 +214,13 @@ export default function Home() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
               <h4 className="text-text-primary font-bold mb-1">Server Connection Offline</h4>
-              <p className="text-xs text-text-secondary max-w-sm">{error}</p>
+              <p className="text-xs text-text-secondary max-w-sm mb-4">{error}</p>
+              <button
+                onClick={() => fetchRepos(query, domain, language, userId)}
+                className="rounded-md bg-[#2da44e] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#2c974b] cursor-pointer"
+              >
+                Retry Search
+              </button>
             </div>
           ) : filteredRepos.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center py-20 rounded-md border border-border-color bg-bg-card text-center transition duration-200">

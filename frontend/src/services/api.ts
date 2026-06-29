@@ -326,5 +326,34 @@ export const apiService = {
       throw new Error(`Failed to validate GitHub identity: ${response.statusText}`);
     }
     return response.json();
+  },
+
+  async clearSavedRepositories(userId: string): Promise<void> {
+    if (isGuestUser(userId)) {
+      localStorage.setItem('gitniche_guest_saved_repos', '[]');
+      return;
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api/saved-repos/clear/${userId}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to clear saved repositories: ${response.statusText}`);
+    }
+  },
+
+  async deleteUserData(userId: string): Promise<void> {
+    if (isGuestUser(userId)) {
+      localStorage.removeItem('gitniche_guest_preferences');
+      localStorage.setItem('gitniche_guest_saved_repos', '[]');
+      return;
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api/preferences/delete-account/${userId}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to delete account data: ${response.statusText}`);
+    }
   }
 };

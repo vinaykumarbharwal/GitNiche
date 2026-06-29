@@ -72,3 +72,13 @@ async def unsave_repository(
             detail="Saved repository not found."
         )
     return {"message": "Repository removed from saved list."}
+
+@router.delete("/saved-repos/clear/{user_id}")
+async def clear_all_saved_repositories(user_id: str):
+    success = await supabase_service.clear_saved_repositories(user_id)
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to clear saved repositories."
+        )
+    return {"message": "All saved repositories cleared."}

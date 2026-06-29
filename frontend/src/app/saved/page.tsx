@@ -22,7 +22,7 @@ export default function SavedRepos() {
     const session = authStorage.getSession();
     if (!session) {
       setIsAuthenticated(false);
-      window.location.href = apiService.getGitHubLoginUrl();
+      setLoading(false);
       return;
     }
 
@@ -70,10 +70,34 @@ export default function SavedRepos() {
     codespaces_url: `https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=${saved.repo_owner}/${saved.repo_name}`,
     gitpod_url: `https://gitpod.io/#${saved.repo_url}`,
   });
-  if (isAuthenticated === null || isAuthenticated === false) {
+  if (isAuthenticated === null) {
     return (
       <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center px-4 py-20 text-center">
-        <div className="text-sm text-text-secondary">Redirecting to GitHub sign-in...</div>
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-border-color border-t-[#0969da] dark:border-t-[#58a6ff]" />
+      </div>
+    );
+  }
+
+  if (isAuthenticated === false) {
+    return (
+      <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center px-4 py-24 text-center">
+        <div className="w-full max-w-md rounded-md border border-border-color bg-bg-card p-8 shadow-sm transition duration-200">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-border-color bg-bg-btn text-text-secondary">
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+            </svg>
+          </div>
+          <h2 className="mb-2 text-xl font-semibold text-text-primary">Sign in to view saved repos</h2>
+          <p className="mb-6 text-sm text-text-secondary">
+            Connect your GitHub account to bookmark opportunities, customize preferences, and manage your saved repositories.
+          </p>
+          <a
+            href={apiService.getGitHubLoginUrl()}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-[#2da44e] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#2c974b]"
+          >
+            Continue with GitHub
+          </a>
+        </div>
       </div>
     );
   }

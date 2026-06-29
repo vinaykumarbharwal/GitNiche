@@ -271,4 +271,32 @@ class SupabaseService:
         except Exception as e:
             self._handle_db_error("save_search_history", e)
 
+    async def clear_saved_repositories(self, user_id: str) -> bool:
+        self._mock_saved_repos = [r for r in self._mock_saved_repos if r["user_id"] != user_id]
+        if not self.enabled:
+            return True
+        try:
+            self.client.table("saved_repositories").delete().eq("user_id", user_id).execute()
+            return True
+        except Exception as e:
+            self._handle_db_error("clear_saved_repositories", e)
+            return True
+
+    async def delete_user_data(self, user_id: str) -> bool:
+        if user_id in self._mock_users:
+            del self._mock_users[user_id]
+        if user_id in self._mock_preferences:
+            del self._mock_preferences[user_id]
+        self._mock_saved_repos = [r for r in self._mock_saved_repos if r["user_id"] != user_id]
+        self._mock_search_history = [s for s in self._mock_search_history if s["user_id"] != user_id]
+
+        if not self.enabled:
+            return True
+        try:
+            self.client.table("users").delete().eq("id", user_id).execute()
+            return True
+        except Exception as e:
+            self._handle_db_error("delete_user_data", e)
+            return True
+
 supabase_service = SupabaseService()
