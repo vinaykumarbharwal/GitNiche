@@ -62,7 +62,6 @@ export default function Navbar() {
               <GitHubMark />
               <span className="text-lg font-semibold tracking-tight">GitNiche</span>
             </Link>
-            <span className="rounded-full border border-[#57606a] px-2 py-0.5 text-[11px] font-medium text-[#c9d1d9] md:hidden">GitHub style</span>
           </div>
 
           <div className="flex flex-1 flex-wrap items-center gap-2 md:gap-1">
@@ -112,7 +111,7 @@ export default function Navbar() {
                 {isDropdownOpen && (
                   <>
                     <div className="fixed inset-0 z-10" onClick={() => setIsDropdownOpen(false)} />
-                    <div className="absolute right-0 mt-2 w-48 z-20 origin-top-right rounded-md border border-[#30363d] bg-[#1f2328] py-1 shadow-lg ring-1 ring-black/5 focus:outline-none text-left">
+                    <div className="absolute left-0 md:left-auto md:right-0 mt-2 w-48 z-20 origin-top-left md:origin-top-right rounded-md border border-[#30363d] bg-[#1f2328] py-1 shadow-lg ring-1 ring-black/5 focus:outline-none text-left">
                       <div className="px-4 py-2 border-b border-[#30363d] text-xs text-[#8c959f]">
                         Signed in as <span className="font-semibold text-white block truncate">{session.username}</span>
                       </div>
