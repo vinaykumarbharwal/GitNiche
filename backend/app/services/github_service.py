@@ -594,6 +594,15 @@ class GitHubService:
 
         github_url = item.get("html_url", f"https://github.com/{owner}/{name}")
 
+        # Estimate good first issues
+        open_issues_count = item.get("open_issues_count", 0)
+        if difficulty == "Beginner-Friendly":
+            gfi = max(1, min(open_issues_count // 8, 12))
+        elif difficulty == "Intermediate":
+            gfi = min(open_issues_count // 15, 5)
+        else:
+            gfi = min(open_issues_count // 30, 2)
+
         return {
             "name": name,
             "owner": owner,
@@ -607,7 +616,10 @@ class GitHubService:
             "gitniche_score": score,
             "github_url": github_url,
             "codespaces_url": self._codespaces_url(owner, name),
-            "gitpod_url": f"https://gitpod.io/#{github_url}"
+            "gitpod_url": f"https://gitpod.io/#{github_url}",
+            "open_issues": open_issues_count,
+            "good_first_issues": gfi,
+            "license": item.get("license", {}).get("spdx_id") or item.get("license", {}).get("name") or "None"
         }
 
     async def _classify_domain(self, name: str, description: str, topics: List[str]) -> str:

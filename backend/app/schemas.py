@@ -69,6 +69,9 @@ class SavedRepositoryResponse(BaseModel):
     stars: int = 0
     forks: int = 0
     language: Optional[str] = None
+    open_issues: int = 0
+    good_first_issues: int = 0
+    license: Optional[str] = "None"
 
     class Config:
         from_attributes = True
@@ -88,3 +91,6 @@ class RepoResult(BaseModel):
     github_url: str
     codespaces_url: str
     gitpod_url: str
+    open_issues: int = 0
+    good_first_issues: int = 0
+    license: Optional[str] = "None"

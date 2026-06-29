@@ -7,6 +7,7 @@ interface FiltersProps {
   onChangeDomain: (domain: string) => void;
   onChangeLevel: (level: string) => void;
   onChangeLanguage: (language: string) => void;
+  onReset: () => void;
 }
 
 export default function Filters({
@@ -16,6 +17,7 @@ export default function Filters({
   onChangeDomain,
   onChangeLevel,
   onChangeLanguage,
+  onReset,
 }: FiltersProps) {
   const domains = ['All Domains', 'AI/ML', 'Blockchain', 'Cybersecurity', 'Web Development', 'DevOps', 'Cloud'];
   const levels = ['All Levels', 'Beginner-Friendly', 'Intermediate', 'Advanced'];
@@ -25,9 +27,18 @@ export default function Filters({
 
   return (
     <aside className="sticky top-24 h-fit w-full rounded-md border border-border-color bg-bg-card p-4 shadow-sm lg:w-72 transition duration-200">
-      <div className="mb-4 border-b border-border-divider pb-3">
-        <h2 className="text-base font-semibold text-text-primary">Filters</h2>
-        <p className="mt-1 text-xs text-text-secondary">Narrow repositories by stack and contribution fit.</p>
+      <div className="mb-4 border-b border-border-divider pb-3 flex items-center justify-between">
+        <div>
+          <h2 className="text-base font-semibold text-text-primary">Filters</h2>
+          <p className="mt-1 text-xs text-text-secondary">Narrow repositories by stack.</p>
+        </div>
+        <button
+          type="button"
+          onClick={onReset}
+          className="text-xs font-semibold text-[#0969da] dark:text-[#58a6ff] hover:underline cursor-pointer"
+        >
+          Clear filters
+        </button>
       </div>
 
       <div className="flex flex-col gap-4">

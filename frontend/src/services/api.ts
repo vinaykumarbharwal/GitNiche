@@ -48,6 +48,9 @@ export interface RepoResult {
   github_url: string;
   codespaces_url: string;
   gitpod_url: string;
+  open_issues?: number;
+  good_first_issues?: number;
+  license?: string | null;
 }
 
 export interface SaveRepoPayload {
@@ -74,6 +77,9 @@ export interface SavedRepository {
   stars?: number;
   forks?: number;
   language?: string | null;
+  open_issues?: number;
+  good_first_issues?: number;
+  license?: string | null;
 }
 
 export interface PreferencesPayload {

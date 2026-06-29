@@ -58,9 +58,31 @@ export default function RepoCard({
       ? 'border-[#ff8182] bg-[#ffebe9] text-[#cf222e] dark:border-[#f85149]/40 dark:bg-[#f85149]/10 dark:text-[#ff7b72]'
       : 'border-[#54aeff] bg-[#ddf4ff] text-[#0969da] dark:border-[#388bfd]/40 dark:bg-[#388bfd]/10 dark:text-[#58a6ff]';
 
-  const formatDate = (dateStr: string) => {
+  const formatNumber = (num: number) => {
+    if (num >= 1000) {
+      return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+    }
+    return num.toString();
+  };
+
+  const getRelativeTime = (dateStr: string) => {
     const date = new Date(dateStr);
-    return Number.isNaN(date.getTime()) ? dateStr : date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    if (Number.isNaN(date.getTime())) return dateStr;
+    
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHr = Math.floor(diffMin / 60);
+    const diffDays = Math.floor(diffHr / 24);
+
+    if (diffSec < 60) return 'just now';
+    if (diffMin < 60) return `${diffMin}m ago`;
+    if (diffHr < 24) return `${diffHr}h ago`;
+    if (diffDays === 1) return 'yesterday';
+    if (diffDays < 30) return `${diffDays} days ago`;
+    
+    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
   return (
@@ -83,28 +105,44 @@ export default function RepoCard({
           {repo.description || 'No description provided.'}
         </p>
 
-        <div className="mb-4 flex flex-wrap gap-2">
-          {repo.language && <span className="rounded-full border border-border-color bg-bg-btn px-2 py-0.5 text-xs font-medium text-text-secondary">{repo.language}</span>}
-          <span className="rounded-full border border-[#54aeff] bg-[#ddf4ff] dark:border-[#388bfd]/40 dark:bg-[#388bfd]/10 dark:text-[#58a6ff] px-2 py-0.5 text-xs font-medium text-[#0969da]">{repo.domain}</span>
-          <span className={`rounded-full border px-2 py-0.5 text-xs font-medium ${difficultyClass}`}>{repo.difficulty_level}</span>
+        {/* Contribution Info Grid */}
+        <div className="mb-4 grid grid-cols-2 gap-y-2 text-xs border-t border-border-divider pt-3 transition duration-200">
+          <div className="flex items-center gap-1.5 text-text-secondary">
+            <span className="font-semibold text-text-primary">Language:</span>
+            <span>{repo.language || 'None'}</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-text-secondary">
+            <span className="font-semibold text-text-primary">Domain:</span>
+            <span>{repo.domain}</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-text-secondary">
+            <span className="font-semibold text-text-primary">License:</span>
+            <span className="truncate max-w-[100px]" title={repo.license || 'None'}>{repo.license || 'None'}</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-text-secondary">
+            <span className="font-semibold text-text-primary">Difficulty:</span>
+            <span className={`inline-block rounded-md border px-1.5 py-0.25 text-[10px] font-semibold leading-none ${difficultyClass}`}>
+              {repo.difficulty_level}
+            </span>
+          </div>
         </div>
       </div>
 
       <div>
-        <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border-divider pt-3 text-xs text-text-secondary">
-          {showStarsAndForks && (
-            <>
-              <span className="flex items-center gap-1">
-                <svg className="h-4 w-4 text-text-secondary" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.211.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.194a.751.751 0 0 1-1.088.791L8 12.347l-3.767 1.982a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.211-.611L7.327.668A.75.75 0 0 1 8 .25Z" /></svg>
-                {repo.stars.toLocaleString()}
-              </span>
-              <span className="flex items-center gap-1">
-                <svg className="h-4 w-4 text-text-secondary" viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm0 2.122a2.25 2.25 0 1 0-1.5 0v5.256a2.25 2.25 0 1 0 1.5 0V8.123A3.75 3.75 0 0 0 8.25 10h2.378a2.25 2.25 0 1 0 0-1.5H8.25A2.25 2.25 0 0 1 6 6.25V5.372ZM12.75 9a.75.75 0 1 1 0 1.5.75.75 0 0 1 0-1.5Zm-8.5 3.5a.75.75 0 1 1 0 1.5.75.75 0 0 1 0-1.5Z" /></svg>
-                {repo.forks.toLocaleString()}
-              </span>
-            </>
-          )}
-          <span className="ml-auto">Updated {formatDate(repo.last_activity_date)}</span>
+        <div className="mb-4 flex flex-wrap items-center justify-between border-t border-border-divider pt-3 text-[11px] text-text-secondary transition duration-200">
+          <span className="flex items-center gap-1" title="GitHub Stars">
+            <svg className="h-3.5 w-3.5 text-text-secondary" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.211.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.194a.751.751 0 0 1-1.088.791L8 12.347l-3.767 1.982a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.211-.611L7.327.668A.75.75 0 0 1 8 .25Z" /></svg>
+            <strong>Stars:</strong> {formatNumber(repo.stars)}
+          </span>
+          <span className="flex items-center gap-1" title="Open Issues">
+            <strong>Open Issues:</strong> {repo.open_issues ?? 0}
+          </span>
+          <span className="flex items-center gap-1" title="Good First Issues">
+            <strong>Good First Issues:</strong> {repo.good_first_issues ?? 0}
+          </span>
+        </div>
+        <div className="mb-4 text-right text-[10px] text-text-secondary">
+          Updated {getRelativeTime(repo.last_activity_date)}
         </div>
 
         <div className="flex flex-wrap gap-2">

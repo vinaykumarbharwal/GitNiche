@@ -118,6 +118,25 @@ export default function Home() {
     setCurrentPage(1);
   }, [query, domain, level, language]);
 
+  const resetFilters = () => {
+    setDomain('All Domains');
+    setLevel('All Levels');
+    setLanguage('All Languages');
+    setQuery('');
+  };
+
+  const getResultsCountText = () => {
+    const count = filteredRepos.length;
+    const langText = language !== 'All Languages' ? language : '';
+    const levelText = level !== 'All Levels' ? level.toLowerCase() : '';
+    const domainText = domain !== 'All Domains' ? `in ${domain}` : '';
+    
+    const filterParts = [langText, levelText, 'projects'].filter(Boolean).join(' ');
+    const domainPart = domainText ? ` ${domainText}` : '';
+    
+    return `${count} ${filterParts}${domainPart} found`;
+  };
+
   const filteredRepos = repos.filter((repo) => {
     return (
       matchesFilter(domain, 'All Domains', repo.domain) &&
@@ -176,13 +195,14 @@ export default function Home() {
           onChangeDomain={(d) => setDomain(d)}
           onChangeLevel={(l) => setLevel(l)}
           onChangeLanguage={(lang) => setLanguage(lang)}
+          onReset={resetFilters}
         />
 
         <div className="flex w-full flex-1 flex-col">
           {/* Results Status */}
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="text-sm font-semibold text-text-primary">
-              {loading ? 'Finding projects...' : `${filteredRepos.length} matches found`}
+              {loading ? 'Finding projects...' : getResultsCountText()}
             </h3>
             
             {/* Show a reminder if using default mock account */}
@@ -196,12 +216,17 @@ export default function Home() {
           {/* Loader, Error, or Results Grid */}
           {loading ? (
             <div className="flex flex-col gap-4">
-              {isWakingUp && (
-                <div className="flex items-center gap-2 rounded-md border border-border-color bg-bg-card px-4 py-3 text-sm text-text-secondary transition duration-200">
+              <div className="flex flex-col gap-1 rounded-md border border-border-color bg-bg-card px-4 py-3 text-sm text-text-secondary transition duration-200">
+                <div className="flex items-center gap-2">
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-border-color border-t-[#0969da] dark:border-t-[#58a6ff]" />
-                  <span>Backend is waking up (Render cold starts can take up to 40 seconds)...</span>
+                  <p className="font-semibold text-text-primary">Finding projects...</p>
                 </div>
-              )}
+                {isWakingUp && (
+                  <p className="text-xs text-text-secondary mt-1 pl-6">
+                    Backend may be waking up. This can take a few seconds.
+                  </p>
+                )}
+              </div>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
                 {Array.from({ length: 6 }).map((_, idx) => (
                   <RepoCardSkeleton key={idx} />

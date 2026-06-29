@@ -28,7 +28,7 @@ export default function SearchBar({ onSearch, initialValue = '' }: SearchBarProp
             type="text"
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            placeholder="Search repositories, issues, or topics"
+            placeholder="Search Python, AI, React, DevOps (names, languages, domains, topics, descriptions)..."
             className="block h-10 w-full rounded-md border border-border-color bg-bg-btn pl-9 pr-3 text-sm text-text-primary outline-none placeholder:text-text-secondary focus:border-[#0969da] focus:bg-bg-card focus:ring-2 focus:ring-[#0969da]/20 transition duration-200"
           />
         </div>

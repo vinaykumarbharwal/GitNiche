@@ -35,6 +35,9 @@ async def get_saved_repositories(user_id: str):
         repo["stars"] = 0
         repo["forks"] = 0
         repo["language"] = None
+        repo["open_issues"] = 0
+        repo["good_first_issues"] = 0
+        repo["license"] = "None"
         
         try:
             async with httpx.AsyncClient() as client:
@@ -47,6 +50,17 @@ async def get_saved_repositories(user_id: str):
                     repo["stars"] = data.get("stargazers_count", 0)
                     repo["forks"] = data.get("forks_count", 0)
                     repo["language"] = data.get("language")
+                    repo["open_issues"] = data.get("open_issues_count", 0)
+                    repo["license"] = data.get("license", {}).get("spdx_id") or data.get("license", {}).get("name") or "None"
+                    
+                    difficulty = repo.get("difficulty")
+                    open_issues_count = data.get("open_issues_count", 0)
+                    if difficulty == "Beginner-Friendly":
+                        repo["good_first_issues"] = max(1, min(open_issues_count // 8, 12))
+                    elif difficulty == "Intermediate":
+                        repo["good_first_issues"] = min(open_issues_count // 15, 5)
+                    else:
+                        repo["good_first_issues"] = min(open_issues_count // 30, 2)
         except Exception:
             pass
         return repo

@@ -69,6 +69,9 @@ export default function SavedRepos() {
     github_url: saved.repo_url,
     codespaces_url: `https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=${saved.repo_owner}/${saved.repo_name}`,
     gitpod_url: `https://gitpod.io/#${saved.repo_url}`,
+    open_issues: saved.open_issues || 0,
+    good_first_issues: saved.good_first_issues || 0,
+    license: saved.license || 'None',
   });
   if (isAuthenticated === null) {
     return (
@@ -87,9 +90,9 @@ export default function SavedRepos() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
             </svg>
           </div>
-          <h2 className="mb-2 text-xl font-semibold text-text-primary">Sign in to view saved repos</h2>
+          <h2 className="mb-2 text-xl font-semibold text-text-primary">Saved Repositories</h2>
           <p className="mb-6 text-sm text-text-secondary">
-            Connect your GitHub account to bookmark opportunities, customize preferences, and manage your saved repositories.
+            Sign in with GitHub to save and revisit your favorite repositories.
           </p>
           <a
             href={apiService.getGitHubLoginUrl()}
@@ -127,9 +130,9 @@ export default function SavedRepos() {
         </div>
       ) : savedList.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center rounded-md border border-border-color bg-bg-card px-4 py-24 text-center shadow-sm transition duration-200">
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-border-color bg-bg-btn text-lg font-semibold text-text-secondary">*</div>
-          <h3 className="mb-1 text-lg font-semibold text-text-primary">No saved repositories yet</h3>
-          <p className="mb-6 max-w-sm text-sm text-text-secondary">Save repositories from Explore and they will appear here.</p>
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-border-color bg-bg-btn text-lg font-semibold text-text-secondary">★</div>
+          <h3 className="mb-1 text-lg font-semibold text-text-primary">You have not saved any repositories yet.</h3>
+          <p className="mb-6 max-w-sm text-sm text-text-secondary">Explore projects and click Save.</p>
           <Link href="/" className="rounded-md bg-[#2da44e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#2c974b]">Explore projects</Link>
         </div>
       ) : (
