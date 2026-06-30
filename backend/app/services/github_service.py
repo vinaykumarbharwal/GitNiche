@@ -203,6 +203,67 @@ class GitHubService:
         else:
             logger.warning("GitHub API configured without token. API rate limit will be constrained.")
 
+    async def validate_user_identity(self, username: str, email: str) -> Dict[str, Any]:
+        normalized_username = (username or "").strip()
+        normalized_email = (email or "").strip().lower()
+
+        email_format_valid = bool(normalized_email) and ("@" in normalized_email and "." in normalized_email.split("@")[-1])
+        default_result = {
+            "username_exists": False,
+            "email_format_valid": email_format_valid,
+            "email_matches_public_profile": None,
+            "email_verification_note": "Unable to validate against GitHub right now.",
+            "profile_url": None,
+        }
+
+        if not normalized_username:
+            default_result["email_verification_note"] = "Enter a GitHub username to validate."
+            return default_result
+
+        try:
+            async with httpx.AsyncClient(timeout=8) as client:
+                response = await client.get(
+                    f"https://api.github.com/users/{normalized_username}",
+                    headers=self.headers,
+                )
+        except Exception as e:
+            logger.warning(f"GitHub identity validation request failed for {normalized_username}: {str(e)}")
+            return default_result
+
+        if response.status_code == 404:
+            default_result["email_verification_note"] = "GitHub username was not found."
+            return default_result
+
+        if response.status_code != 200:
+            default_result["email_verification_note"] = "GitHub verification is temporarily unavailable."
+            return default_result
+
+        profile = response.json()
+        public_email = (profile.get("email") or "").strip().lower()
+
+        email_matches_public_profile: bool | None = None
+        note = "GitHub account found."
+
+        if not email_format_valid:
+            note = "GitHub account found, but email format is invalid."
+        elif public_email:
+            email_matches_public_profile = public_email == normalized_email
+            note = (
+                "Email matches the public GitHub email."
+                if email_matches_public_profile
+                else "Email does not match the public GitHub email."
+            )
+        else:
+            note = "GitHub account found. Email cannot be fully verified because the profile email is private."
+
+        return {
+            "username_exists": True,
+            "email_format_valid": email_format_valid,
+            "email_matches_public_profile": email_matches_public_profile,
+            "email_verification_note": note,
+            "profile_url": profile.get("html_url"),
+        }
+
     async def search_repositories(
         self,
         query: str,
@@ -212,7 +273,7 @@ class GitHubService:
         user_preferred_languages: Optional[List[str]] = None
     ) -> List[Dict[str, Any]]:
         # 1. Check cache first
-        cache_key = f"search:v9:{query}:{domain}:{experience_level}:{language}"
+        cache_key = f"search:v13:{query}:{domain}:{experience_level}:{language}"
         cached_data = await redis_service.get(cache_key)
         if cached_data:
             logger.info(f"Returning cached search results for key: {cache_key}")
@@ -220,7 +281,7 @@ class GitHubService:
 
         # 2. Build GitHub Search Query
         # Beginner-friendly repos often have open starter issues but do not push every week.
-        activity_window_days = 90 if experience_level == BEGINNER_LEVEL else 14
+        activity_window_days = 90
         pushed_after = (datetime.now(timezone.utc) - timedelta(days=activity_window_days)).strftime("%Y-%m-%d")
         
         base_q_parts = []
@@ -237,11 +298,27 @@ class GitHubService:
         
         results = []
         try:
-            async with httpx.AsyncClient() as client:
+            limits = httpx.Limits(max_connections=500, max_keepalive_connections=100)
+            async with httpx.AsyncClient(limits=limits, timeout=10.0) as client:
                 items = await self._fetch_search_candidates(client, base_q_parts, domain, experience_level)
 
-                for item in items:
-                    repo_data = await self._process_repository_item(client, item, user_preferred_languages or [])
+                # Process top candidates concurrently with controlled concurrency to prevent memory spikes on small instances
+                import asyncio
+                limit = 60 if (not domain or domain == "All Domains") else 30
+                unique_items = items[:limit]
+
+                sem = asyncio.Semaphore(15)
+                async def sem_process(item):
+                    async with sem:
+                        return await self._process_repository_item(client, item, user_preferred_languages or [])
+
+                tasks = [sem_process(item) for item in unique_items]
+                processed_items = await asyncio.gather(*tasks, return_exceptions=True)
+
+                for repo_data in processed_items:
+                    if isinstance(repo_data, Exception) or not repo_data:
+                        continue
+
                     if domain:
                         repo_data["domain"] = domain
 
@@ -353,8 +430,14 @@ class GitHubService:
     ) -> List[Dict[str, Any]]:
         topic_groups: List[List[str]] = []
 
-        if domain in DOMAIN_TOPICS:
+        if domain and domain in DOMAIN_TOPICS:
             topic_groups.append(DOMAIN_TOPICS[domain])
+        elif not domain or domain == "All Domains":
+            # Compile top topics from all domains to fetch relevant repos for All Domains
+            all_topics = []
+            for dom in DOMAIN_TOPICS:
+                all_topics.append(DOMAIN_TOPICS[dom][0])
+            topic_groups.append(all_topics)
 
         search_queries = self._build_topic_search_queries(base_q_parts, topic_groups)
 
@@ -385,7 +468,9 @@ class GitHubService:
 
         request_errors = []
 
-        for search_query in search_queries:
+        import asyncio
+
+        async def fetch_query_candidates(search_query):
             is_beginner_query = any(token in search_query for token in BEGINNER_TOPICS + BEGINNER_ISSUE_QUALIFIERS)
             try:
                 response = await client.get(
@@ -399,17 +484,20 @@ class GitHubService:
                     headers=self.headers,
                     timeout=5.0,
                 )
-            except (httpx.ConnectError, httpx.TimeoutException) as e:
-                raise GitHubSearchError(f"{search_query}: {type(e).__name__}: {e}") from e
-            except httpx.HTTPError as e:
+                if response.status_code == 200:
+                    return response.json().get("items", []), is_beginner_query
+                else:
+                    request_errors.append(f"{search_query}: HTTP {response.status_code}")
+            except Exception as e:
                 request_errors.append(f"{search_query}: {type(e).__name__}: {e}")
-                continue
+            return [], is_beginner_query
 
-            if response.status_code != 200:
-                request_errors.append(f"{search_query}: HTTP {response.status_code}: {response.text[:300]}")
-                continue
+        # Query concurrently (limit to top 6 queries to prevent hitting API rate limits)
+        tasks = [fetch_query_candidates(q) for q in search_queries[:6]]
+        query_results = await asyncio.gather(*tasks)
 
-            for item in response.json().get("items", []):
+        for items, is_beginner_query in query_results:
+            for item in items:
                 repo_id = item.get("id") or item.get("full_name")
                 if repo_id in seen_repo_ids:
                     if is_beginner_query and repo_id in candidates_by_id:
@@ -501,6 +589,15 @@ class GitHubService:
 
         github_url = item.get("html_url", f"https://github.com/{owner}/{name}")
 
+        # Estimate good first issues
+        open_issues_count = item.get("open_issues_count", 0)
+        if difficulty == "Beginner-Friendly":
+            gfi = max(1, min(open_issues_count // 8, 12))
+        elif difficulty == "Intermediate":
+            gfi = min(open_issues_count // 15, 5)
+        else:
+            gfi = min(open_issues_count // 30, 2)
+
         return {
             "name": name,
             "owner": owner,
@@ -514,7 +611,10 @@ class GitHubService:
             "gitniche_score": score,
             "github_url": github_url,
             "codespaces_url": self._codespaces_url(owner, name),
-            "gitpod_url": f"https://gitpod.io/#{github_url}"
+            "gitpod_url": f"https://gitpod.io/#{github_url}",
+            "open_issues": open_issues_count,
+            "good_first_issues": gfi,
+            "license": item.get("license", {}).get("spdx_id") or item.get("license", {}).get("name") or "None"
         }
 
     async def _classify_domain(self, name: str, description: str, topics: List[str]) -> str:

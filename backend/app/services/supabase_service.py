@@ -45,6 +45,17 @@ class SupabaseService:
             "created_at": datetime.utcnow()
         }
 
+    def _handle_db_error(self, method_name: str, exception: Exception):
+        err_msg = str(exception)
+        if "PGRST205" in err_msg or "schema cache" in err_msg or "PGRST204" in err_msg:
+            logger.warning(
+                f"Supabase database schema is missing tables. Disabling Supabase client for this session and "
+                f"falling back to local memory. Error details: {err_msg}"
+            )
+            self.enabled = False
+        else:
+            logger.warning(f"Supabase database error in {method_name}: {err_msg}. Falling back to memory.")
+
     async def get_or_create_user(self, github_username: str, email: str) -> Dict[str, Any]:
         if not self.enabled:
             # Check mock users
@@ -77,7 +88,7 @@ class SupabaseService:
             if insert_resp.data:
                 return insert_resp.data[0]
         except Exception as e:
-            logger.error(f"Supabase error in get_or_create_user: {str(e)}")
+            self._handle_db_error("get_or_create_user", e)
             
         # Fallback to creating a local user on error
         uid = str(uuid.uuid4())
@@ -123,9 +134,11 @@ class SupabaseService:
             if resp.data:
                 return resp.data[0]
         except Exception as e:
-            logger.error(f"Supabase error in save_preferences: {str(e)}")
+            self._handle_db_error("save_preferences", e)
 
-        return {**pref_data, "id": str(uuid.uuid4()), "created_at": datetime.utcnow()}
+        # Fallback to local memory on error
+        self._mock_preferences[user_id] = {**pref_data, "id": str(uuid.uuid4()), "created_at": datetime.utcnow()}
+        return self._mock_preferences[user_id]
 
     async def get_preferences(self, user_id: str) -> Optional[Dict[str, Any]]:
         if not self.enabled:
@@ -136,7 +149,7 @@ class SupabaseService:
             if resp.data:
                 return resp.data[0]
         except Exception as e:
-            logger.error(f"Supabase error in get_preferences: {str(e)}")
+            self._handle_db_error("get_preferences", e)
 
         return self._mock_preferences.get(user_id)
 
@@ -183,9 +196,12 @@ class SupabaseService:
             if resp.data:
                 return resp.data[0]
         except Exception as e:
-            logger.error(f"Supabase error in save_repository: {str(e)}")
+            self._handle_db_error("save_repository", e)
 
-        return {**repo_data, "id": str(uuid.uuid4()), "created_at": datetime.utcnow()}
+        # Fallback to local memory on error
+        new_repo = {**repo_data, "id": str(uuid.uuid4()), "created_at": datetime.utcnow()}
+        self._mock_saved_repos.append(new_repo)
+        return new_repo
 
     async def get_saved_repositories(self, user_id: str) -> List[Dict[str, Any]]:
         if not self.enabled:
@@ -196,9 +212,48 @@ class SupabaseService:
             if resp.data:
                 return resp.data
         except Exception as e:
-            logger.error(f"Supabase error in get_saved_repositories: {str(e)}")
+            self._handle_db_error("get_saved_repositories", e)
 
         return [r for r in self._mock_saved_repos if r["user_id"] == user_id]
+
+    async def unsave_repository(self, user_id: str, repo_owner: str, repo_name: str) -> bool:
+        if not self.enabled:
+            before_len = len(self._mock_saved_repos)
+            self._mock_saved_repos = [
+                r for r in self._mock_saved_repos
+                if not (r["user_id"] == user_id and r["repo_owner"] == repo_owner and r["repo_name"] == repo_name)
+            ]
+            return len(self._mock_saved_repos) < before_len
+
+        try:
+            check_resp = self.client.table("saved_repositories").select("id")\
+                .eq("user_id", user_id)\
+                .eq("repo_owner", repo_owner)\
+                .eq("repo_name", repo_name).execute()
+            if not check_resp.data:
+                # Try fallback list before giving up
+                before_len = len(self._mock_saved_repos)
+                self._mock_saved_repos = [
+                    r for r in self._mock_saved_repos
+                    if not (r["user_id"] == user_id and r["repo_owner"] == repo_owner and r["repo_name"] == repo_name)
+                ]
+                return len(self._mock_saved_repos) < before_len
+
+            self.client.table("saved_repositories").delete()\
+                .eq("user_id", user_id)\
+                .eq("repo_owner", repo_owner)\
+                .eq("repo_name", repo_name).execute()
+            return True
+        except Exception as e:
+            self._handle_db_error("unsave_repository", e)
+
+        # Try fallback on exception
+        before_len = len(self._mock_saved_repos)
+        self._mock_saved_repos = [
+            r for r in self._mock_saved_repos
+            if not (r["user_id"] == user_id and r["repo_owner"] == repo_owner and r["repo_name"] == repo_name)
+        ]
+        return len(self._mock_saved_repos) < before_len
 
     async def save_search_history(self, user_id: str, query: str, filters: Dict[str, Any]) -> None:
         search_data = {
@@ -214,6 +269,34 @@ class SupabaseService:
         try:
             self.client.table("search_history").insert(search_data).execute()
         except Exception as e:
-            logger.error(f"Supabase error in save_search_history: {str(e)}")
+            self._handle_db_error("save_search_history", e)
+
+    async def clear_saved_repositories(self, user_id: str) -> bool:
+        self._mock_saved_repos = [r for r in self._mock_saved_repos if r["user_id"] != user_id]
+        if not self.enabled:
+            return True
+        try:
+            self.client.table("saved_repositories").delete().eq("user_id", user_id).execute()
+            return True
+        except Exception as e:
+            self._handle_db_error("clear_saved_repositories", e)
+            return True
+
+    async def delete_user_data(self, user_id: str) -> bool:
+        if user_id in self._mock_users:
+            del self._mock_users[user_id]
+        if user_id in self._mock_preferences:
+            del self._mock_preferences[user_id]
+        self._mock_saved_repos = [r for r in self._mock_saved_repos if r["user_id"] != user_id]
+        self._mock_search_history = [s for s in self._mock_search_history if s["user_id"] != user_id]
+
+        if not self.enabled:
+            return True
+        try:
+            self.client.table("users").delete().eq("id", user_id).execute()
+            return True
+        except Exception as e:
+            self._handle_db_error("delete_user_data", e)
+            return True
 
 supabase_service = SupabaseService()

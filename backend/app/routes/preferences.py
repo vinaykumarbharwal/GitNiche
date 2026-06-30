@@ -1,8 +1,16 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Query, status
 from app.schemas import PreferencesRequest, UserPreferencesResponse
+from app.services.github_service import github_service
 from app.services.supabase_service import supabase_service
 
 router = APIRouter()
+
+@router.get("/preferences/validate-github")
+async def validate_github_identity(
+    username: str = Query(..., min_length=1),
+    email: str = Query(..., min_length=3),
+):
+    return await github_service.validate_user_identity(username=username, email=email)
 
 @router.post("/preferences")
 async def save_user_preferences(payload: PreferencesRequest):
@@ -38,3 +46,13 @@ async def get_user_preferences(user_id: str):
             detail=f"Preferences for user {user_id} not found."
         )
     return pref
+
+@router.delete("/preferences/delete-account/{user_id}")
+async def delete_user_account(user_id: str):
+    success = await supabase_service.delete_user_data(user_id)
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to delete user data."
+        )
+    return {"message": "All user data and account deleted successfully."}

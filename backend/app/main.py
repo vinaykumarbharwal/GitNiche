@@ -19,9 +19,14 @@ app = FastAPI(
 )
 
 # Configure CORS for Next.js frontend
+origins = [
+    settings.FRONTEND_URL,
+    "http://localhost:3000",
+    "https://localhost:3000",
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify actual domain
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -33,10 +38,13 @@ app.include_router(search.router, prefix="/api", tags=["Search"])
 app.include_router(preferences.router, prefix="/api", tags=["Preferences"])
 app.include_router(saved_repos.router, prefix="/api", tags=["Saved Repositories"])
 
+from datetime import datetime
+
 @app.get("/health")
 def health_check():
     return {
-        "status": "healthy",
+        "status": "ok",
+        "time": datetime.utcnow().isoformat() + "Z",
         "api": "GitNiche API v1.0.0",
         "services": {
             "supabase": "connected" if settings.SUPABASE_URL and settings.SUPABASE_KEY else "mocked",

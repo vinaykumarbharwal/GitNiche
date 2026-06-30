@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import SearchBar from '@/components/SearchBar';
 import Filters from '@/components/Filters';
 import RepoCard from '@/components/RepoCard';
-import { apiService, authStorage, RepoResult } from '@/services/api';
+import RepoCardSkeleton from '@/components/RepoCardSkeleton';
+import { apiService, authStorage, GUEST_USER_ID, RepoResult } from '@/services/api';
 
 function getErrorMessage(err: unknown, fallback: string) {
   return err instanceof Error ? err.message : fallback;
@@ -15,23 +17,41 @@ const matchesFilter = (selected: string, allValue: string, actual?: string | nul
 };
 
 export default function Home() {
+  const pathname = usePathname();
   const [query, setQuery] = useState('');
   const [domain, setDomain] = useState('All Domains');
   const [level, setLevel] = useState('All Levels');
   const [language, setLanguage] = useState('All Languages');
   
   const [repos, setRepos] = useState<RepoResult[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isWakingUp, setIsWakingUp] = useState(false);
 
   const [userId, setUserId] = useState<string | null>(null);
+  const [savedRepoIds, setSavedRepoIds] = useState<Set<string>>(new Set());
   const requestIdRef = useRef(0);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Initialize user_id from localStorage
   useEffect(() => {
     const session = authStorage.getSession();
-    setUserId(session?.user_id || '00000000-0000-0000-0000-000000000000');
+    setUserId(session?.user_id || GUEST_USER_ID);
   }, []);
+
+  // Fetch saved repositories to track save state on Explore page
+  useEffect(() => {
+    if (!userId) return;
+    const fetchSaved = async () => {
+      try {
+        const saved = await apiService.getSavedRepositories(userId);
+        setSavedRepoIds(new Set(saved.map(r => `${r.repo_owner}/${r.repo_name}`.toLowerCase())));
+      } catch (err) {
+        console.error('Failed to load saved repos in Explore page:', err);
+      }
+    };
+    fetchSaved();
+  }, [userId, pathname]);
 
   const fetchRepos = useCallback(async (
     searchQuery: string,
@@ -44,7 +64,17 @@ export default function Home() {
     requestIdRef.current = requestId;
     setLoading(true);
     setError(null);
+    setIsWakingUp(false);
+
+    // Setup waking up timer (7 seconds)
+    const wakeUpTimer = setTimeout(() => {
+      if (requestIdRef.current === requestId) {
+        setIsWakingUp(true);
+      }
+    }, 7000);
+
     try {
+<<<<<<< HEAD
       const results = await apiService.searchRepositories({
         query: searchQuery,
         domain: selectedDomain,
@@ -52,15 +82,39 @@ export default function Home() {
         language: selectedLang,
         user_id: currUserId || undefined
       });
+=======
+      // 15 seconds request timeout
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("TIMEOUT")), 15000)
+      );
+
+      const results = await Promise.race([
+        apiService.searchRepositories({
+          query: searchQuery,
+          domain: selectedDomain,
+          experience_level: undefined,
+          language: selectedLang,
+          user_id: currUserId || undefined
+        }),
+        timeoutPromise
+      ]);
+
+>>>>>>> a1ea59ddba13503b89a0d3877394e0da728a17a0
       if (requestId !== requestIdRef.current) return;
       setRepos(results);
     } catch (err: unknown) {
       if (requestId !== requestIdRef.current) return;
       console.error(err);
-      setError(getErrorMessage(err, 'Failed to load opportunities. Ensure the backend server is running.')); 
+      if (err instanceof Error && err.message === "TIMEOUT") {
+        setError('Could not load projects. The backend server might be starting up or is offline. Please click Retry.');
+      } else {
+        setError(getErrorMessage(err, 'Failed to load opportunities. Ensure the backend server is running.')); 
+      }
     } finally {
+      clearTimeout(wakeUpTimer);
       if (requestId === requestIdRef.current) {
         setLoading(false);
+        setIsWakingUp(false);
       }
     }
   }, []);
@@ -70,6 +124,30 @@ export default function Home() {
     fetchRepos(query, domain, level, language, userId);
   }, [query, domain, level, language, userId, fetchRepos]);
 
+  // Reset page when filters or search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query, domain, level, language]);
+
+  const resetFilters = () => {
+    setDomain('All Domains');
+    setLevel('All Levels');
+    setLanguage('All Languages');
+    setQuery('');
+  };
+
+  const getResultsCountText = () => {
+    const count = filteredRepos.length;
+    const langText = language !== 'All Languages' ? language : '';
+    const levelText = level !== 'All Levels' ? level.toLowerCase() : '';
+    const domainText = domain !== 'All Domains' ? `in ${domain}` : '';
+    
+    const filterParts = [langText, levelText, 'projects'].filter(Boolean).join(' ');
+    const domainPart = domainText ? ` ${domainText}` : '';
+    
+    return `${count} ${filterParts}${domainPart} found`;
+  };
+
   const filteredRepos = repos.filter((repo) => {
     return (
       matchesFilter(domain, 'All Domains', repo.domain) &&
@@ -78,8 +156,13 @@ export default function Home() {
     );
   });
 
+  const PAGE_SIZE = 20;
+  const totalPages = Math.ceil(filteredRepos.length / PAGE_SIZE);
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const paginatedRepos = filteredRepos.slice(startIndex, startIndex + PAGE_SIZE);
+
   const handleSaveRepo = async (repo: RepoResult) => {
-    const targetUserId = userId || '00000000-0000-0000-0000-000000000000';
+    const targetUserId = userId || GUEST_USER_ID;
     
     await apiService.saveRepository({
       user_id: targetUserId,
@@ -90,17 +173,32 @@ export default function Home() {
       difficulty: repo.difficulty_level,
       gitniche_score: repo.gitniche_score,
     });
+
+    setSavedRepoIds(prev => {
+      const next = new Set(prev);
+      next.add(`${repo.owner}/${repo.name}`.toLowerCase());
+      return next;
+    });
   };
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
       {/* Hero Header */}
+<<<<<<< HEAD
       <div className="mb-6 border-b border-[#30363d] pb-6">
         <h1 className="mb-2 text-3xl font-semibold tracking-tight text-[#f0f6fc] sm:text-4xl">
           Discover Your Next
           <span className="block text-[#58a6ff]">Open Source Contribution</span>
         </h1>
         <p className="max-w-2xl text-sm leading-6 text-[#8b949e] sm:text-base">
+=======
+      <div className="mb-6 border-b border-border-divider pb-6 transition duration-200">
+        <h1 className="mb-2 text-3xl font-semibold tracking-tight text-text-primary sm:text-4xl">
+          Discover Your Next
+          <span className="block text-[#0969da] dark:text-[#58a6ff]">Open Source Contribution</span>
+        </h1>
+        <p className="max-w-2xl text-sm leading-6 text-text-secondary sm:text-base">
+>>>>>>> a1ea59ddba13503b89a0d3877394e0da728a17a0
           GitNiche uses AI-assisted labeling to find active, beginner-friendly GitHub repositories customized to your skills and career objectives.
         </p>
       </div>
@@ -117,11 +215,13 @@ export default function Home() {
           onChangeDomain={(d) => setDomain(d)}
           onChangeLevel={(l) => setLevel(l)}
           onChangeLanguage={(lang) => setLanguage(lang)}
+          onReset={resetFilters}
         />
 
         <div className="flex w-full flex-1 flex-col">
           {/* Results Status */}
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+<<<<<<< HEAD
             <h3 className="text-sm font-semibold text-[#c9d1d9]">
               {loading ? 'Finding projects...' : `${filteredRepos.length} matches found`}
             </h3>
@@ -129,6 +229,15 @@ export default function Home() {
             {/* Show a reminder if using default mock account */}
             {userId === '00000000-0000-0000-0000-000000000000' && (
               <span className="rounded-full border border-[#30363d] bg-[#161b22] px-2.5 py-1 text-xs text-[#8b949e]">
+=======
+            <h3 className="text-sm font-semibold text-text-primary">
+              {loading ? 'Finding projects...' : getResultsCountText()}
+            </h3>
+            
+            {/* Show a reminder if using default mock account */}
+            {userId === GUEST_USER_ID && (
+              <span className="rounded-full border border-border-color bg-bg-btn px-2.5 py-1 text-xs text-text-secondary transition duration-200">
+>>>>>>> a1ea59ddba13503b89a0d3877394e0da728a17a0
                 Browsing as guest. Sign in with GitHub to save your profile.
               </span>
             )}
@@ -136,6 +245,7 @@ export default function Home() {
 
           {/* Loader, Error, or Results Grid */}
           {loading ? (
+<<<<<<< HEAD
             <div className="flex-1 flex flex-col items-center justify-center py-20 gap-4">
               <div className="w-10 h-10 border-4 border-[#30363d] border-t-[#58a6ff] rounded-full animate-spin"></div>
               <p className="text-xs text-[#8b949e]">Classifying domains & calculating GitNiche scores...</p>
@@ -166,6 +276,93 @@ export default function Home() {
                 />
               ))}
             </div>
+=======
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1 rounded-md border border-border-color bg-bg-card px-4 py-3 text-sm text-text-secondary transition duration-200">
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-border-color border-t-[#0969da] dark:border-t-[#58a6ff]" />
+                  <p role="status" aria-live="polite" className="font-semibold text-text-primary">Finding projects...</p>
+                </div>
+                {isWakingUp && (
+                  <p className="text-xs text-text-secondary mt-1 pl-6">
+                    Backend may be waking up. This can take a few seconds.
+                  </p>
+                )}
+              </div>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, idx) => (
+                  <RepoCardSkeleton key={idx} />
+                ))}
+              </div>
+            </div>
+          ) : error ? (
+            <div className="flex-1 flex flex-col items-center justify-center py-16 px-4 rounded-md border border-[#ff8182] bg-[#ffebe9] dark:border-[#f85149]/40 dark:bg-[#f85149]/10 text-center transition duration-200">
+              <svg className="w-12 h-12 text-[#cf222e] dark:text-[#ff7b72] mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <h4 className="text-text-primary font-bold mb-1">Server Connection Offline</h4>
+              <p className="text-xs text-text-secondary max-w-sm mb-4">{error}</p>
+              <button
+                onClick={() => fetchRepos(query, domain, language, userId)}
+                className="rounded-md bg-[#2da44e] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#2c974b] cursor-pointer"
+              >
+                Retry Search
+              </button>
+            </div>
+          ) : filteredRepos.length === 0 ? (
+            <div className="flex-1 flex flex-col items-center justify-center py-20 rounded-md border border-border-color bg-bg-card text-center transition duration-200">
+              <svg className="w-12 h-12 text-text-secondary mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" />
+              </svg>
+              <h4 className="text-text-primary font-bold mb-1">No matching opportunities found</h4>
+              <p className="text-xs text-text-secondary max-w-sm px-4">
+                Try broadening your query, adjusting the filter settings, or searching for other topics. 
+                Keep in mind that repository indexes are automatically refreshed on a schedule, and new opportunities are added periodically.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
+                {paginatedRepos.map((repo, idx) => (
+                  <RepoCard
+                    key={`${repo.owner}-${repo.name}-${idx}`}
+                    repo={repo}
+                    isSaved={savedRepoIds.has(`${repo.owner}/${repo.name}`.toLowerCase())}
+                    onSave={handleSaveRepo}
+                  />
+                ))}
+              </div>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="mt-8 flex items-center justify-center gap-4 border-t border-border-divider pt-6 transition duration-200">
+                  <button
+                    onClick={() => {
+                      setCurrentPage((p) => Math.max(1, p - 1));
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    disabled={currentPage === 1}
+                    className="rounded-md border border-border-color bg-bg-card px-4 py-2 text-sm font-semibold text-text-primary hover:bg-bg-btn disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                  >
+                    Previous
+                  </button>
+                  <span className="text-sm text-text-secondary">
+                    Page <span className="font-semibold text-text-primary">{currentPage}</span> of <span className="font-semibold text-text-primary">{totalPages}</span>
+                  </span>
+                  <button
+                    onClick={() => {
+                      setCurrentPage((p) => Math.min(totalPages, p + 1));
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    disabled={currentPage === totalPages}
+                    className="rounded-md border border-border-color bg-bg-card px-4 py-2 text-sm font-semibold text-text-primary hover:bg-bg-btn disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
+>>>>>>> a1ea59ddba13503b89a0d3877394e0da728a17a0
           )}
         </div>
       </div>
