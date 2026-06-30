@@ -28,6 +28,8 @@ INTERMEDIATE_LEVEL = "Intermediate"
 ADVANCED_LEVEL = "Advanced"
 ADVANCED_TOPICS = {"kernel", "compiler", "runtime", "database-engine", "cryptography"}
 BEGINNER_ISSUE_QUALIFIERS = ["good-first-issues:>0", "help-wanted-issues:>0"]
+MAX_SEARCH_CANDIDATES = 24
+GITHUB_SEARCH_PER_PAGE = 12
 
 FALLBACK_REPOSITORIES = [
     {
@@ -392,7 +394,7 @@ class GitHubService:
                         "q": search_query,
                         "sort": "stars",
                         "order": "desc",
-                        "per_page": 30,
+                        "per_page": GITHUB_SEARCH_PER_PAGE,
                     },
                     headers=self.headers,
                     timeout=5.0,
@@ -418,6 +420,8 @@ class GitHubService:
                     item["_gitniche_beginner_candidate"] = True
                 candidates_by_id[repo_id] = item
                 candidates.append(item)
+                if len(candidates) >= MAX_SEARCH_CANDIDATES:
+                    return candidates
 
         if not candidates and request_errors:
             raise GitHubSearchError("; ".join(request_errors[:3]))
@@ -464,8 +468,7 @@ class GitHubService:
         # Standard repos have readme
         has_readme = True 
         
-        # CONTRIBUTING.md detection - to avoid hitting rate limit we check if contributing is a topic or we check cache.
-        # Let's check cached repo metadata to see if we already checked CONTRIBUTING.md.
+        # Keep search responsive by avoiding per-repository metadata requests in the hot path.
         repo_cache_key = f"repo:meta:{owner}:{name}"
         cached_meta_str = await redis_service.get(repo_cache_key)
         
@@ -473,16 +476,8 @@ class GitHubService:
         if cached_meta_str:
             has_contributing = json.loads(cached_meta_str).get("has_contributing", False)
         else:
-            # Let's do a lightweight request to check if CONTRIBUTING.md exists
-            # We will handle exceptions and default to False to protect performance.
-            try:
-                contrib_url = f"https://api.github.com/repos/{owner}/{name}/contents/CONTRIBUTING.md"
-                c_resp = await client.head(contrib_url, headers=self.headers, timeout=2.0)
-                has_contributing = c_resp.status_code == 200
-            except Exception:
-                has_contributing = False
-                
-            # Cache the file checks
+            normalized_topics = {topic.lower() for topic in topics}
+            has_contributing = bool(normalized_topics.intersection({"contributing", "good-first-issue", "help-wanted"}))
             await redis_service.set(repo_cache_key, json.dumps({"has_contributing": has_contributing}), expire_seconds=86400)
 
         # Check beginner labels by querying issue list briefly, or check beginner topics
