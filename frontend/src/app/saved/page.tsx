@@ -55,31 +55,31 @@ export default function SavedRepos() {
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-6 flex flex-col gap-4 border-b border-[#d8dee4] pb-6 sm:flex-row sm:items-end sm:justify-between">
+      <div className="mb-6 flex flex-col gap-4 border-b border-[#30363d] pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-[#24292f]">Saved repositories</h1>
-          <p className="mt-2 text-sm text-[#57606a]">Showing saved opportunities for <span className="font-semibold text-[#0969da]">{username}</span>.</p>
+          <h1 className="text-3xl font-semibold tracking-tight text-[#f0f6fc]">Saved repositories</h1>
+          <p className="mt-2 text-sm text-[#8b949e]">Showing saved opportunities for <span className="font-semibold text-[#58a6ff]">{username}</span>.</p>
         </div>
-        <Link href="/" className="w-fit rounded-md border border-[#d0d7de] bg-[#f6f8fa] px-3 py-1.5 text-sm font-semibold text-[#24292f] hover:bg-white">
+        <Link href="/" className="w-fit rounded-md border border-[#30363d] bg-[#21262d] px-3 py-1.5 text-sm font-semibold text-[#f0f6fc] hover:bg-[#30363d]">
           Back to Explore
         </Link>
       </div>
 
       {loading ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-4 py-20">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#d0d7de] border-t-[#0969da]" />
-          <p className="text-sm text-[#57606a]">Retrieving saved repositories...</p>
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#30363d] border-t-[#58a6ff]" />
+          <p className="text-sm text-[#8b949e]">Retrieving saved repositories...</p>
         </div>
       ) : error ? (
-        <div className="flex flex-1 flex-col items-center justify-center rounded-md border border-[#ff8182] bg-[#ffebe9] px-4 py-16 text-center">
-          <h4 className="mb-1 font-semibold text-[#24292f]">Failed to load bookmarks</h4>
-          <p className="max-w-sm text-sm text-[#57606a]">{error}</p>
+        <div className="flex flex-1 flex-col items-center justify-center rounded-md border border-[#f85149] bg-[#490202] px-4 py-16 text-center">
+          <h4 className="mb-1 font-semibold text-[#f0f6fc]">Failed to load bookmarks</h4>
+          <p className="max-w-sm text-sm text-[#ffb3ad]">{error}</p>
         </div>
       ) : savedList.length === 0 ? (
-        <div className="flex flex-1 flex-col items-center justify-center rounded-md border border-[#d0d7de] bg-white px-4 py-24 text-center shadow-sm">
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-[#d0d7de] bg-[#f6f8fa] text-lg font-semibold text-[#57606a]">*</div>
-          <h3 className="mb-1 text-lg font-semibold text-[#24292f]">No saved repositories yet</h3>
-          <p className="mb-6 max-w-sm text-sm text-[#57606a]">Save repositories from Explore and they will appear here.</p>
+        <div className="flex flex-1 flex-col items-center justify-center rounded-md border border-[#30363d] bg-[#161b22] px-4 py-24 text-center shadow-sm">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-[#30363d] bg-[#0d1117] text-lg font-semibold text-[#8b949e]">*</div>
+          <h3 className="mb-1 text-lg font-semibold text-[#f0f6fc]">No saved repositories yet</h3>
+          <p className="mb-6 max-w-sm text-sm text-[#8b949e]">Save repositories from Explore and they will appear here.</p>
           <Link href="/" className="rounded-md bg-[#2da44e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#2c974b]">Explore projects</Link>
         </div>
       ) : (

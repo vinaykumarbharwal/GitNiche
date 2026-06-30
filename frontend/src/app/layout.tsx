@@ -14,12 +14,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="min-h-screen bg-[#f6f8fa] text-[#24292f] flex flex-col font-sans selection:bg-[#0969da]/20">
+      <body className="min-h-screen bg-[#0d1117] text-[#f0f6fc] flex flex-col font-sans selection:bg-[#1f6feb]/30">
         <Navbar />
         <main className="flex-1 flex flex-col">
           {children}
         </main>
-        <footer className="border-t border-[#d0d7de] bg-white py-6 text-center text-xs text-[#57606a] mt-auto">
+        <footer className="border-t border-[#30363d] bg-[#161b22] py-6 text-center text-xs text-[#8b949e] mt-auto">
           <div className="max-w-7xl mx-auto px-4">
             <p>(c) {new Date().getFullYear()} GitNiche. Find open-source work faster.</p>
           </div>

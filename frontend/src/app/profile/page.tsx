@@ -18,9 +18,9 @@ export default function Profile() {
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-6 border-b border-[#d8dee4] pb-6">
-        <h1 className="text-3xl font-semibold tracking-tight text-[#24292f]">Developer settings</h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#57606a]">
+      <div className="mb-6 border-b border-[#30363d] pb-6">
+        <h1 className="text-3xl font-semibold tracking-tight text-[#f0f6fc]">Developer settings</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#8b949e]">
           Connect GitHub and tune your preferred domains, languages, difficulty, and contribution goals.
         </p>
       </div>
@@ -29,8 +29,8 @@ export default function Profile() {
         <PreferencesForm onSaveSuccess={handleSaveSuccess} />
 
         {user && (
-          <div className="mx-auto w-full max-w-3xl rounded-md border border-[#d0d7de] bg-white p-4 text-sm text-[#57606a] shadow-sm">
-            Active profile: <span className="font-semibold text-[#0969da]">{user.username}</span>
+          <div className="mx-auto w-full max-w-3xl rounded-md border border-[#30363d] bg-[#161b22] p-4 text-sm text-[#8b949e] shadow-sm">
+            Active profile: <span className="font-semibold text-[#58a6ff]">{user.username}</span>
           </div>
         )}
       </div>
