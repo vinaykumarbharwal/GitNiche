@@ -27,18 +27,18 @@ export default function RepoCard({ repo, onSave, isSaved: initialIsSaved = false
   };
 
   const scoreClass = repo.gitniche_score >= 80
-    ? 'border-[#2da44e] bg-[#dafbe1] text-[#116329]'
+    ? 'border-[#3fb950] bg-[#143d1f] text-[#7ee787]'
     : repo.gitniche_score >= 60
-      ? 'border-[#54aeff] bg-[#ddf4ff] text-[#0969da]'
+      ? 'border-[#58a6ff] bg-[#0c2d6b] text-[#79c0ff]'
       : repo.gitniche_score >= 40
-        ? 'border-[#d4a72c] bg-[#fff8c5] text-[#7d4e00]'
-        : 'border-[#ff8182] bg-[#ffebe9] text-[#cf222e]';
+        ? 'border-[#d29922] bg-[#3b2300] text-[#e3b341]'
+        : 'border-[#f85149] bg-[#490202] text-[#ff7b72]';
 
   const difficultyClass = repo.difficulty_level === 'Beginner-Friendly'
-    ? 'border-[#2da44e] bg-[#dafbe1] text-[#116329]'
+    ? 'border-[#3fb950] bg-[#143d1f] text-[#7ee787]'
     : repo.difficulty_level === 'Advanced'
-      ? 'border-[#ff8182] bg-[#ffebe9] text-[#cf222e]'
-      : 'border-[#54aeff] bg-[#ddf4ff] text-[#0969da]';
+      ? 'border-[#f85149] bg-[#490202] text-[#ff7b72]'
+      : 'border-[#58a6ff] bg-[#0c2d6b] text-[#79c0ff]';
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -46,12 +46,12 @@ export default function RepoCard({ repo, onSave, isSaved: initialIsSaved = false
   };
 
   return (
-    <article className="flex min-h-72 flex-col justify-between rounded-md border border-[#d0d7de] bg-white p-5 shadow-sm transition hover:border-[#8c959f] hover:shadow-md">
+    <article className="flex min-h-72 flex-col justify-between rounded-md border border-[#30363d] bg-[#161b22] p-5 shadow-sm transition hover:border-[#8b949e] hover:shadow-md">
       <div>
         <div className="mb-3 flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <p className="mb-1 truncate text-xs text-[#57606a]">{repo.owner}</p>
-            <a href={repo.github_url} target="_blank" rel="noopener noreferrer" className="block truncate text-lg font-semibold text-[#0969da] hover:underline">
+            <p className="mb-1 truncate text-xs text-[#8b949e]">{repo.owner}</p>
+            <a href={repo.github_url} target="_blank" rel="noopener noreferrer" className="block truncate text-lg font-semibold text-[#58a6ff] hover:underline">
               {repo.name}
             </a>
           </div>
@@ -61,19 +61,19 @@ export default function RepoCard({ repo, onSave, isSaved: initialIsSaved = false
           </div>
         </div>
 
-        <p className="mb-4 line-clamp-2 min-h-10 text-sm leading-5 text-[#57606a]">
+        <p className="mb-4 line-clamp-2 min-h-10 text-sm leading-5 text-[#c9d1d9]">
           {repo.description || 'No description provided.'}
         </p>
 
         <div className="mb-4 flex flex-wrap gap-2">
-          {repo.language && <span className="rounded-full border border-[#d0d7de] bg-[#f6f8fa] px-2 py-0.5 text-xs font-medium text-[#57606a]">{repo.language}</span>}
-          <span className="rounded-full border border-[#54aeff] bg-[#ddf4ff] px-2 py-0.5 text-xs font-medium text-[#0969da]">{repo.domain}</span>
+          {repo.language && <span className="rounded-full border border-[#30363d] bg-[#0d1117] px-2 py-0.5 text-xs font-medium text-[#c9d1d9]">{repo.language}</span>}
+          <span className="rounded-full border border-[#58a6ff] bg-[#0c2d6b] px-2 py-0.5 text-xs font-medium text-[#79c0ff]">{repo.domain}</span>
           <span className={`rounded-full border px-2 py-0.5 text-xs font-medium ${difficultyClass}`}>{repo.difficulty_level}</span>
         </div>
       </div>
 
       <div>
-        <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-[#d8dee4] pt-3 text-xs text-[#57606a]">
+        <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-[#30363d] pt-3 text-xs text-[#8b949e]">
           <span className="flex items-center gap-1">
             <svg className="h-4 w-4" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.211.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.194a.751.751 0 0 1-1.088.791L8 12.347l-3.767 1.982a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.211-.611L7.327.668A.75.75 0 0 1 8 .25Z" /></svg>
             {repo.stars.toLocaleString()}
@@ -86,11 +86,11 @@ export default function RepoCard({ repo, onSave, isSaved: initialIsSaved = false
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <a href={repo.github_url} target="_blank" rel="noopener noreferrer" className="rounded-md border border-[#d0d7de] bg-[#f6f8fa] px-3 py-1.5 text-xs font-semibold text-[#24292f] hover:bg-[#f3f4f6]">GitHub</a>
-          <a href={repo.codespaces_url} target="_blank" rel="noopener noreferrer" className="rounded-md border border-[#d0d7de] bg-[#f6f8fa] px-3 py-1.5 text-xs font-semibold text-[#24292f] hover:bg-[#f3f4f6]">Codespaces</a>
-          <a href={repo.gitpod_url} target="_blank" rel="noopener noreferrer" className="rounded-md border border-[#d0d7de] bg-[#f6f8fa] px-3 py-1.5 text-xs font-semibold text-[#24292f] hover:bg-[#f3f4f6]">Gitpod</a>
+          <a href={repo.github_url} target="_blank" rel="noopener noreferrer" className="rounded-md border border-[#30363d] bg-[#21262d] px-3 py-1.5 text-xs font-semibold text-[#f0f6fc] hover:bg-[#30363d]">GitHub</a>
+          <a href={repo.codespaces_url} target="_blank" rel="noopener noreferrer" className="rounded-md border border-[#30363d] bg-[#21262d] px-3 py-1.5 text-xs font-semibold text-[#f0f6fc] hover:bg-[#30363d]">Codespaces</a>
+          <a href={repo.gitpod_url} target="_blank" rel="noopener noreferrer" className="rounded-md border border-[#30363d] bg-[#21262d] px-3 py-1.5 text-xs font-semibold text-[#f0f6fc] hover:bg-[#30363d]">Gitpod</a>
           {onSave && (
-            <button onClick={handleSave} disabled={isSaved || loading} className={`ml-auto rounded-md border px-3 py-1.5 text-xs font-semibold ${isSaved ? 'border-[#2da44e] bg-[#dafbe1] text-[#116329]' : 'border-[#d0d7de] bg-white text-[#24292f] hover:bg-[#f6f8fa]'}`}>
+            <button onClick={handleSave} disabled={isSaved || loading} className={`ml-auto rounded-md border px-3 py-1.5 text-xs font-semibold ${isSaved ? 'border-[#3fb950] bg-[#143d1f] text-[#7ee787]' : 'border-[#30363d] bg-[#161b22] text-[#f0f6fc] hover:bg-[#21262d]'}`}>
               {loading ? 'Saving...' : isSaved ? 'Saved' : 'Save'}
             </button>
           )}

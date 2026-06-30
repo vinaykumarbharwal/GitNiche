@@ -83,66 +83,66 @@ export default function PreferencesForm({ onSaveSuccess }: PreferencesFormProps)
     }
   };
 
-  const fieldClass = 'rounded-md border border-[#d0d7de] bg-[#f6f8fa] px-3 py-2 text-sm text-[#24292f] outline-none placeholder:text-[#6e7781] focus:border-[#0969da] focus:bg-white focus:ring-2 focus:ring-[#0969da]/20';
+  const fieldClass = 'rounded-md border border-[#30363d] bg-[#0d1117] px-3 py-2 text-sm text-[#f0f6fc] outline-none placeholder:text-[#8b949e] focus:border-[#1f6feb] focus:bg-[#0d1117] focus:ring-2 focus:ring-[#1f6feb]/30';
 
   return (
-    <form onSubmit={handleSubmit} className="mx-auto w-full max-w-3xl rounded-md border border-[#d0d7de] bg-white shadow-sm">
-      <div className="border-b border-[#d8dee4] px-5 py-4">
-        <h2 className="text-base font-semibold text-[#24292f]">Developer profile</h2>
-        <p className="mt-1 text-sm text-[#57606a]">Use your GitHub identity and preferences to tune repository scoring.</p>
+    <form onSubmit={handleSubmit} className="mx-auto w-full max-w-3xl rounded-md border border-[#30363d] bg-[#161b22] shadow-sm">
+      <div className="border-b border-[#30363d] px-5 py-4">
+        <h2 className="text-base font-semibold text-[#f0f6fc]">Developer profile</h2>
+        <p className="mt-1 text-sm text-[#8b949e]">Use your GitHub identity and preferences to tune repository scoring.</p>
       </div>
 
       <div className="flex flex-col gap-5 p-5">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <label className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-[#24292f]">GitHub username</span>
+            <span className="text-sm font-medium text-[#f0f6fc]">GitHub username</span>
             <input type="text" required value={username} onChange={(e) => setUsername(e.target.value)} placeholder="octocat" className={fieldClass} />
           </label>
           <label className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-[#24292f]">Email</span>
+            <span className="text-sm font-medium text-[#f0f6fc]">Email</span>
             <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="dev@example.com" className={fieldClass} />
           </label>
         </div>
 
-        <div className="border-t border-[#d8dee4] pt-5">
-          <div className="mb-2 text-sm font-medium text-[#24292f]">Preferred domains</div>
+        <div className="border-t border-[#30363d] pt-5">
+          <div className="mb-2 text-sm font-medium text-[#f0f6fc]">Preferred domains</div>
           <div className="flex flex-wrap gap-2">
             {domains.map((dom) => {
               const selected = selectedDomains.includes(dom);
-              return <button type="button" key={dom} onClick={() => toggleValue(dom, selectedDomains, setSelectedDomains)} className={`rounded-full border px-3 py-1 text-xs font-medium ${selected ? 'border-[#0969da] bg-[#ddf4ff] text-[#0969da]' : 'border-[#d0d7de] bg-[#f6f8fa] text-[#57606a] hover:bg-white'}`}>{dom}</button>;
+              return <button type="button" key={dom} onClick={() => toggleValue(dom, selectedDomains, setSelectedDomains)} className={`rounded-full border px-3 py-1 text-xs font-medium ${selected ? 'border-[#58a6ff] bg-[#0c2d6b] text-[#79c0ff]' : 'border-[#30363d] bg-[#0d1117] text-[#8b949e] hover:bg-[#21262d]'}`}>{dom}</button>;
             })}
           </div>
         </div>
 
         <div>
-          <div className="mb-2 text-sm font-medium text-[#24292f]">Preferred languages</div>
+          <div className="mb-2 text-sm font-medium text-[#f0f6fc]">Preferred languages</div>
           <div className="flex flex-wrap gap-2">
             {languages.map((lang) => {
               const selected = selectedLanguages.includes(lang);
-              return <button type="button" key={lang} onClick={() => toggleValue(lang, selectedLanguages, setSelectedLanguages)} className={`rounded-full border px-3 py-1 text-xs font-medium ${selected ? 'border-[#2da44e] bg-[#dafbe1] text-[#116329]' : 'border-[#d0d7de] bg-[#f6f8fa] text-[#57606a] hover:bg-white'}`}>{lang}</button>;
+              return <button type="button" key={lang} onClick={() => toggleValue(lang, selectedLanguages, setSelectedLanguages)} className={`rounded-full border px-3 py-1 text-xs font-medium ${selected ? 'border-[#3fb950] bg-[#143d1f] text-[#7ee787]' : 'border-[#30363d] bg-[#0d1117] text-[#8b949e] hover:bg-[#21262d]'}`}>{lang}</button>;
             })}
           </div>
         </div>
 
         <div>
-          <div className="mb-2 text-sm font-medium text-[#24292f]">Target difficulty</div>
+          <div className="mb-2 text-sm font-medium text-[#f0f6fc]">Target difficulty</div>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             {['Beginner-Friendly', 'Intermediate', 'Advanced'].map((level) => (
-              <button type="button" key={level} onClick={() => setExperienceLevel(level)} className={`rounded-md border px-3 py-2 text-sm font-medium ${experienceLevel === level ? 'border-[#0969da] bg-[#ddf4ff] text-[#0969da]' : 'border-[#d0d7de] bg-[#f6f8fa] text-[#24292f] hover:bg-white'}`}>{level}</button>
+              <button type="button" key={level} onClick={() => setExperienceLevel(level)} className={`rounded-md border px-3 py-2 text-sm font-medium ${experienceLevel === level ? 'border-[#58a6ff] bg-[#0c2d6b] text-[#79c0ff]' : 'border-[#30363d] bg-[#0d1117] text-[#f0f6fc] hover:bg-[#21262d]'}`}>{level}</button>
             ))}
           </div>
         </div>
 
         <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-[#24292f]">Career objectives</span>
+          <span className="text-sm font-medium text-[#f0f6fc]">Career objectives</span>
           <textarea rows={4} value={careerGoal} onChange={(e) => setCareerGoal(e.target.value)} placeholder="Find Python ML projects to build my portfolio." className={`${fieldClass} resize-none`} />
         </label>
 
-        <div className="flex flex-col gap-3 border-t border-[#d8dee4] pt-5 sm:flex-row sm:items-center">
+        <div className="flex flex-col gap-3 border-t border-[#30363d] pt-5 sm:flex-row sm:items-center">
           <button type="submit" disabled={loading} className="rounded-md bg-[#2da44e] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#2c974b] disabled:opacity-60">
             {loading ? 'Saving...' : 'Save preferences'}
           </button>
-          {message && <span className={`text-sm font-medium ${message.isError ? 'text-[#cf222e]' : 'text-[#116329]'}`}>{message.text}</span>}
+          {message && <span className={`text-sm font-medium ${message.isError ? 'text-[#ff7b72]' : 'text-[#7ee787]'}`}>{message.text}</span>}
         </div>
       </div>
     </form>
