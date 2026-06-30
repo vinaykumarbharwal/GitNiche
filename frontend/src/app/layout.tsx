@@ -38,20 +38,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full antialiased">
-<<<<<<< HEAD
-      <body className="min-h-screen bg-[#0d1117] text-[#f0f6fc] flex flex-col font-sans selection:bg-[#1f6feb]/30">
-=======
-      <body className="min-h-screen bg-bg-page text-text-primary flex flex-col font-sans selection:bg-[#0969da]/20 transition-colors duration-200">
->>>>>>> a1ea59ddba13503b89a0d3877394e0da728a17a0
+      <body className="min-h-screen bg-bg-page text-text-primary flex flex-col font-sans selection:bg-[#1f6feb]/30 transition-colors duration-200">
         <Navbar />
         <main className="flex-1 flex flex-col">
           {children}
         </main>
-<<<<<<< HEAD
-        <footer className="border-t border-[#30363d] bg-[#161b22] py-6 text-center text-xs text-[#8b949e] mt-auto">
-=======
         <footer className="border-t border-border-color bg-bg-footer py-6 text-center text-xs text-text-secondary mt-auto transition-colors duration-200">
->>>>>>> a1ea59ddba13503b89a0d3877394e0da728a17a0
           <div className="max-w-7xl mx-auto px-4">
             <p>(c) {new Date().getFullYear()} GitNiche. Find open-source work faster.</p>
             <p className="mt-1">
@@ -60,20 +52,20 @@ export default function RootLayout({
                 href="https://github.com/vinaykumarbharwal"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-medium text-[#0969da] hover:underline"
+                className="font-medium text-[#58a6ff] hover:underline"
               >
                 GitHub
               </a>
               {' '}|{' '}
-              <Link href="/privacy" className="font-medium text-[#0969da] hover:underline">
+              <Link href="/privacy" className="font-medium text-[#58a6ff] hover:underline">
                 Privacy Policy
               </Link>
               {' '}|{' '}
-              <Link href="/terms" className="font-medium text-[#0969da] hover:underline">
+              <Link href="/terms" className="font-medium text-[#58a6ff] hover:underline">
                 Terms of Service
               </Link>
               {' '}|{' '}
-              <Link href="/contact" className="font-medium text-[#0969da] hover:underline">
+              <Link href="/contact" className="font-medium text-[#58a6ff] hover:underline">
                 Contact
               </Link>
             </p>

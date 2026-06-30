@@ -38,7 +38,7 @@ export default function AboutPage() {
         <div className="mt-8">
           <h2 className="text-lg font-semibold text-text-primary mb-3">How GitNiche Works</h2>
           <ol className="list-decimal list-inside space-y-2 text-sm text-text-secondary">
-            <li><strong>Fetches active GitHub repositories:</strong> We query GitHub's Search API for recently active projects.</li>
+            <li><strong>Fetches active GitHub repositories:</strong> We query GitHub&apos;s Search API for recently active projects.</li>
             <li><strong>Labels them:</strong> Our categorizer assigns matching labels for domain (e.g. AI/ML, DevOps), primary language, and developer difficulty level.</li>
             <li><strong>Helps you find work:</strong> Ranks and scores repositories to showcase those with open issues and active maintainers.</li>
             <li><strong>Saves your bookmarks:</strong> Save opportunities to your profile so you can revisit them anytime.</li>

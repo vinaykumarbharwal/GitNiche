@@ -42,13 +42,8 @@ export default function Navbar() {
   };
 
   const isLinkActive = (path: string) => (
-<<<<<<< HEAD
-    pathname === path
-      ? 'text-white bg-[#1f6feb]'
-=======
     pathname === path || (path !== '/' && pathname.startsWith(`${path}/`))
-      ? 'text-white bg-[#316dca]'
->>>>>>> a1ea59ddba13503b89a0d3877394e0da728a17a0
+      ? 'text-white bg-[#1f6feb]'
       : 'text-[#f0f6fc] hover:bg-[#30363d]'
   );
 

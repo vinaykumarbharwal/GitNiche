@@ -13,7 +13,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-base font-semibold text-text-primary">1. Acceptance of Terms</h2>
             <p className="mt-2">
-              By accessing or using the GitNiche platform ("Service"), you agree to comply with and be bound by these Terms of Service. If you do not agree, please do not use the Service.
+              By accessing or using the GitNiche platform (&quot;Service&quot;), you agree to comply with and be bound by these Terms of Service. If you do not agree, please do not use the Service.
             </p>
           </section>
 
@@ -27,14 +27,14 @@ export default function TermsPage() {
           <section>
             <h2 className="text-base font-semibold text-text-primary">3. User Conduct &amp; GitHub Scopes</h2>
             <p className="mt-2">
-              Users connect their GitHub account using OAuth. You agree not to exploit or abuse the Service's query endpoints or database storage. You must abide by GitHub's standard Acceptable Use Policies when initiating contributions or launching Codespaces.
+              Users connect their GitHub account using OAuth. You agree not to exploit or abuse the Service&apos;s query endpoints or database storage. You must abide by GitHub&apos;s standard Acceptable Use Policies when initiating contributions or launching Codespaces.
             </p>
           </section>
 
           <section>
             <h2 className="text-base font-semibold text-text-primary">4. Disclaimers</h2>
             <p className="mt-2">
-              GitNiche is provided "as is" and "as available". We do not guarantee the completeness, accuracy, or availability of indexed repository metrics (stars, issue counts, activity timestamps). Discovering and contributing to external repositories is performed entirely at your own risk.
+              GitNiche is provided &quot;as is&quot; and &quot;as available&quot;. We do not guarantee the completeness, accuracy, or availability of indexed repository metrics (stars, issue counts, activity timestamps). Discovering and contributing to external repositories is performed entirely at your own risk.
             </p>
           </section>
 

@@ -153,7 +153,7 @@ export default function PreferencesForm({ onSaveSuccess }: PreferencesFormProps)
             <span className="text-sm font-medium text-[#f0f6fc]">GitHub username</span>
             <input type="text" required value={username} onChange={(e) => setUsername(e.target.value)} placeholder="octocat" className={fieldClass} />
             {identityValidation && (
-              <span className={`text-xs ${identityValidation.username_exists ? 'text-[#116329]' : 'text-[#cf222e]'}`}>
+              <span className={`text-xs ${identityValidation.username_exists ? 'text-[#7ee787]' : 'text-[#ff7b72]'}`}>
                 {identityValidation.username_exists ? 'GitHub username found.' : 'GitHub username not found.'}
               </span>
             )}
@@ -162,27 +162,22 @@ export default function PreferencesForm({ onSaveSuccess }: PreferencesFormProps)
             <span className="text-sm font-medium text-[#f0f6fc]">Email</span>
             <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="dev@example.com" className={fieldClass} />
             {identityValidation && (
-              <span className={`text-xs ${identityValidation.email_format_valid ? 'text-[#116329]' : 'text-[#cf222e]'}`}>
+              <span className={`text-xs ${identityValidation.email_format_valid ? 'text-[#7ee787]' : 'text-[#ff7b72]'}`}>
                 {identityValidation.email_verification_note}
               </span>
             )}
           </label>
         </div>
 
-<<<<<<< HEAD
-        <div className="border-t border-[#30363d] pt-5">
-          <div className="mb-2 text-sm font-medium text-[#f0f6fc]">Preferred domains</div>
-=======
         {(validationLoading || validationError) && (
           <div className="-mt-2 text-xs">
-            {validationLoading && <span className="text-[#57606a]">Verifying GitHub identity...</span>}
-            {!validationLoading && validationError && <span className="text-[#cf222e]">{validationError}</span>}
+            {validationLoading && <span className="text-[#8b949e]">Verifying GitHub identity...</span>}
+            {!validationLoading && validationError && <span className="text-[#ff7b72]">{validationError}</span>}
           </div>
         )}
 
-        <div className="border-t border-[#d8dee4] pt-5">
-          <div className="mb-2 text-sm font-medium text-[#24292f]">Preferred domains</div>
->>>>>>> a1ea59ddba13503b89a0d3877394e0da728a17a0
+        <div className="border-t border-[#30363d] pt-5">
+          <div className="mb-2 text-sm font-medium text-[#f0f6fc]">Preferred domains</div>
           <div className="flex flex-wrap gap-2">
             {domains.map((dom) => {
               const selected = selectedDomains.includes(dom);
@@ -215,13 +210,8 @@ export default function PreferencesForm({ onSaveSuccess }: PreferencesFormProps)
           <textarea rows={4} value={careerGoal} onChange={(e) => setCareerGoal(e.target.value)} placeholder="Find Python ML projects to build my portfolio." className={`${fieldClass} resize-none`} />
         </label>
 
-<<<<<<< HEAD
         <div className="flex flex-col gap-3 border-t border-[#30363d] pt-5 sm:flex-row sm:items-center">
-          <button type="submit" disabled={loading} className="rounded-md bg-[#2da44e] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#2c974b] disabled:opacity-60">
-=======
-        <div className="flex flex-col gap-3 border-t border-[#d8dee4] pt-5 sm:flex-row sm:items-center">
           <button type="submit" disabled={loading || !canSubmitIdentity} className="rounded-md bg-[#2da44e] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#2c974b] disabled:opacity-60">
->>>>>>> a1ea59ddba13503b89a0d3877394e0da728a17a0
             {loading ? 'Saving...' : 'Save preferences'}
           </button>
           {message && <span className={`text-sm font-medium ${message.isError ? 'text-[#ff7b72]' : 'text-[#7ee787]'}`}>{message.text}</span>}

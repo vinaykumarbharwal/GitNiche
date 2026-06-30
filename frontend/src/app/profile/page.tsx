@@ -60,13 +60,6 @@ export default function Profile() {
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
-<<<<<<< HEAD
-      <div className="mb-6 border-b border-[#30363d] pb-6">
-        <h1 className="text-3xl font-semibold tracking-tight text-[#f0f6fc]">Developer settings</h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#8b949e]">
-          Connect GitHub and tune your preferred domains, languages, difficulty, and contribution goals.
-        </p>
-=======
       <div className="mb-6 flex flex-col gap-4 border-b border-border-divider pb-6 sm:flex-row sm:items-center sm:justify-between transition duration-200">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight text-text-primary">Developer settings</h1>
@@ -82,32 +75,27 @@ export default function Profile() {
             Sign out
           </button>
         )}
->>>>>>> a1ea59ddba13503b89a0d3877394e0da728a17a0
       </div>
 
       <div className="flex w-full flex-col gap-6">
         <PreferencesForm onSaveSuccess={handleSaveSuccess} />
 
         {user && (
-<<<<<<< HEAD
-          <div className="mx-auto w-full max-w-3xl rounded-md border border-[#30363d] bg-[#161b22] p-4 text-sm text-[#8b949e] shadow-sm">
-            Active profile: <span className="font-semibold text-[#58a6ff]">{user.username}</span>
-=======
-          <div className="mx-auto w-full max-w-3xl rounded-md border border-[#d0d7de] dark:border-border-color bg-bg-card p-5 transition duration-200 shadow-sm">
+          <div className="mx-auto w-full max-w-3xl rounded-md border border-border-color bg-bg-card p-5 transition duration-200 shadow-sm">
             <h3 className="text-base font-semibold text-text-primary mb-2">Active profile</h3>
             <div className="text-sm text-text-secondary">
-              Logged in as <span className="font-semibold text-[#0969da] dark:text-[#58a6ff]">{user.username}</span>.
+              Logged in as <span className="font-semibold text-[#58a6ff]">{user.username}</span>.
             </div>
           </div>
         )}
 
         {user && (
-          <div className="mx-auto w-full max-w-3xl rounded-md border border-[#ff8182]/50 dark:border-[#f85149]/40 bg-bg-card p-5 transition duration-200 shadow-sm">
-            <h3 className="text-base font-semibold text-[#cf222e] dark:text-[#ff7b72] mb-1">Danger Zone</h3>
+          <div className="mx-auto w-full max-w-3xl rounded-md border border-[#f85149]/40 bg-bg-card p-5 transition duration-200 shadow-sm">
+            <h3 className="text-base font-semibold text-[#ff7b72] mb-1">Danger Zone</h3>
             <p className="text-xs text-text-secondary mb-4">Permanent actions regarding your account and saved opportunities.</p>
             
             {dangerMessage && (
-              <div className="mb-4 text-xs font-semibold text-[#cf222e] dark:text-[#ff7b72]">
+              <div className="mb-4 text-xs font-semibold text-[#ff7b72]">
                 {dangerMessage}
               </div>
             )}
@@ -117,7 +105,7 @@ export default function Profile() {
                 type="button"
                 disabled={dangerLoading}
                 onClick={handleClearSaved}
-                className="rounded-md border border-border-color px-4 py-2 text-sm font-semibold text-text-primary hover:bg-[#f6f8fa] dark:hover:bg-[#21262d] transition duration-200 disabled:opacity-60 cursor-pointer"
+                className="rounded-md border border-border-color px-4 py-2 text-sm font-semibold text-text-primary hover:bg-[#21262d] transition duration-200 disabled:opacity-60 cursor-pointer"
               >
                 Clear saved repos
               </button>
@@ -130,7 +118,6 @@ export default function Profile() {
                 Delete my profile &amp; data
               </button>
             </div>
->>>>>>> a1ea59ddba13503b89a0d3877394e0da728a17a0
           </div>
         )}
       </div>
