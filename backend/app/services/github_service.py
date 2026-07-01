@@ -272,8 +272,16 @@ class GitHubService:
         language: Optional[str] = None,
         user_preferred_languages: Optional[List[str]] = None
     ) -> List[Dict[str, Any]]:
+        # Normalize frontend default "All" values to None
+        if domain == "All Domains":
+            domain = None
+        if experience_level == "All Levels":
+            experience_level = None
+        if language == "All Languages":
+            language = None
+
         # 1. Check cache first
-        cache_key = f"search:v13:{query}:{domain}:{experience_level}:{language}"
+        cache_key = f"search:v14:{query}:{domain}:{experience_level}:{language}"
         cached_data = await redis_service.get(cache_key)
         if cached_data:
             logger.info(f"Returning cached search results for key: {cache_key}")
@@ -304,7 +312,7 @@ class GitHubService:
 
                 # Process top candidates concurrently with controlled concurrency to prevent memory spikes on small instances
                 import asyncio
-                limit = 60 if (not domain or domain == "All Domains") else 30
+                limit = 240 if (not domain or domain == "All Domains") else 110
                 unique_items = items[:limit]
 
                 sem = asyncio.Semaphore(15)
