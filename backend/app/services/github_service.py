@@ -28,8 +28,8 @@ INTERMEDIATE_LEVEL = "Intermediate"
 ADVANCED_LEVEL = "Advanced"
 ADVANCED_TOPICS = {"kernel", "compiler", "runtime", "database-engine", "cryptography"}
 BEGINNER_ISSUE_QUALIFIERS = ["good-first-issues:>0", "help-wanted-issues:>0"]
-MAX_SEARCH_CANDIDATES = 24
-GITHUB_SEARCH_PER_PAGE = 12
+MAX_SEARCH_CANDIDATES = 400
+GITHUB_SEARCH_PER_PAGE = 80
 
 FALLBACK_REPOSITORIES = [
     {
@@ -281,7 +281,7 @@ class GitHubService:
             language = None
 
         # 1. Check cache first
-        cache_key = f"search:v14:{query}:{domain}:{experience_level}:{language}"
+        cache_key = f"search:v15:{query}:{domain}:{experience_level}:{language}"
         cached_data = await redis_service.get(cache_key)
         if cached_data:
             logger.info(f"Returning cached search results for key: {cache_key}")
